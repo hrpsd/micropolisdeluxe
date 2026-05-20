@@ -1,6 +1,6 @@
 // ==================================================================================
 // = NAS2D
-// = Copyright © 2008 - 2026 Leeor Dicker
+// = Copyright © 2008 - 2022 Leeor Dicker
 // ==================================================================================
 // = NAS2D is distributed under the terms of the zlib license. You are free to copy,
 // = modify and distribute the software under the terms of the zlib license.
@@ -9,15 +9,15 @@
 // ==================================================================================
 #pragma once
 
-#include "Math/Rectangle.h"
-#include "Math/Vector.h"
+#include "Rectangle.h"
+#include "Vector.h"
 
 #include <string>
 #include <vector>
 #include <string_view>
 
-#include <SDL3/SDL.h>
-
+#include "SDL_include.h"
+#include SDL_INCLUDE_TTF
 
 
 /**
@@ -40,7 +40,7 @@ public:
 
 	struct GlyphMetrics
 	{
-		Rectangle<int> uvRect{};
+		MRectangle<int> uvRect{};
 		int minX{0};
 		int minY{0};
 		int maxX{0};
@@ -60,6 +60,8 @@ public:
 		int ascent{0};
 		Vector<int> glyphSize;
 		std::vector<GlyphMetrics> metrics;
+		
+		TTF_Font* font;
 	};
 
 
@@ -80,7 +82,7 @@ public:
 
 	SDL_Texture* texture() { return mFontInfo.texture; }
 
-private:
+//private:
 	std::string mResourceName; /**< File path */
 	FontInfo mFontInfo;
 };

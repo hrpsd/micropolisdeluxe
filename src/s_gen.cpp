@@ -1,13 +1,15 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
+#include "main.h"
 
 #include "CityProperties.h"
 #include "Map.h"
@@ -17,19 +19,19 @@
 
 #include "w_tk.h"
 #include "w_update.h"
-#include "Util.h"
+#include "w_util.h"
 
 
 #include <algorithm>
 #include <limits>
 
-/* Generate Map */
+/* Generate map */
 
 
 #define WATER_LOW	RIVER /* 2 */
-#define WATER_HIGH	RIVER_EDGE_LAST /* 20 */
-constexpr int WOODS_LOW = TreeBase;
-constexpr int WOODS_HIGH = Unused2;
+#define WATER_HIGH	LASTRIVEDGE /* 20 */
+#define WOODS_LOW	TREEBASE /* 21 */
+#define WOODS_HIGH	UNUSED_TRASH2 /* 39 */
 
 
 constexpr auto RADIUS = 18;
@@ -47,8 +49,8 @@ int ERand(int limit)
 {
   int x, z;
 
-  z = randomRange(0, limit);
-  x = randomRange(0, limit);
+  z = RandomRange(0, limit);
+  x = RandomRange(0, limit);
   
   return std::min(x, z);
 }
@@ -56,7 +58,19 @@ int ERand(int limit)
 
 bool IsTree(int cell)
 {
-    return (((cell & LowerMask) >= WOODS_LOW) && ((cell & LowerMask) <= WOODS_HIGH));
+    return (((cell & LOMASK) >= WOODS_LOW) && ((cell & LOMASK) <= WOODS_HIGH));
+}
+
+
+void ClearMap()
+{
+    for (int x = 0; x < SimWidth; x++)
+    {
+        for (int y = 0; y < SimHeight; y++)
+        {
+            map[x][y] = DIRT;
+        }
+    }
 }
 
 
@@ -66,9 +80,9 @@ void ClearUnnatural()
     {
         for (int y = 0; y < SimHeight; y++)
         {
-            if (tileValue(x, y) > Woods)
+            if (map[x][y] > WOODS)
             {
-                tileValue(x, y) = Dirt;
+                map[x][y] = DIRT;
             }
         }
     }
@@ -98,29 +112,29 @@ void PutOnMap(int Mchar, int Xoff, int Yoff)
     int Xloc = MapX + Xoff;
     int Yloc = MapY + Yoff;
 
-    if (!coordinatesValid({ Xloc, Yloc }))
+    if (!CoordinatesValid({ Xloc, Yloc }))
     {
         return;
     }
 
-    int temp = tileValue(Xloc, Yloc);
+    int temp = map[Xloc][Yloc];
     if (temp != 0)
     {
-        temp = temp & LowerMask;
-        if (temp == River)
+        temp = temp & LOMASK;
+        if (temp == RIVER)
         {
-            if (Mchar != RiverChannel)
+            if (Mchar != CHANNEL)
             {
                 return;
             }
         }
-        if (temp == RiverChannel)
+        if (temp == CHANNEL)
         {
             return;
         }
     }
 
-    tileValue(Xloc, Yloc) = Mchar;
+    map[Xloc][Yloc] = Mchar;
 }
 
 
@@ -141,7 +155,7 @@ void SmoothTrees()
     {
         for (int MapY = 0; MapY < SimHeight; MapY++)
         {
-            if (IsTree(tileValue(MapX, MapY)))
+            if (IsTree(map[MapX][MapY]))
             {
                 int bitindex = 0;
                 for (int z = 0; z < 4; z++)
@@ -151,7 +165,7 @@ void SmoothTrees()
                     int Xtem = MapX + DX[z];
                     int Ytem = MapY + DY[z];
 
-                    if (coordinatesValid({ Xtem, Ytem }) && IsTree(tileValue(Xtem, Ytem)))
+                    if (CoordinatesValid({ Xtem, Ytem }) && IsTree(map[Xtem][Ytem]))
                     {
                         bitindex++;
                     }
@@ -161,18 +175,18 @@ void SmoothTrees()
 
                 if (temp)
                 {
-                    if (temp != Woods)
+                    if (temp != WOODS)
                     {
                         if ((MapX + MapY) & 1)
                         {
                             temp = temp - 8;
                         }
                     }
-                    tileValue(MapX, MapY) = temp + BulldozableBurnableBits;
+                    map[MapX][MapY] = temp + BLBNBIT;
                 }
                 else
                 {
-                    tileValue(MapX, MapY) = temp;
+                    map[MapX][MapY] = temp;
                 }
             }
         }
@@ -187,17 +201,17 @@ void SmoothRiver()
 
     static int REdTab[16] =
     {
-        13 + BulldozableBit, 13 + BulldozableBit, 17 + BulldozableBit, 15 + BulldozableBit,
-        5 + BulldozableBit, 2, 19 + BulldozableBit, 17 + BulldozableBit,
-        9 + BulldozableBit, 11 + BulldozableBit, 2, 13 + BulldozableBit,
-        7 + BulldozableBit, 9 + BulldozableBit, 5 + BulldozableBit, 2
+        13 + BULLBIT, 13 + BULLBIT, 17 + BULLBIT, 15 + BULLBIT,
+        5 + BULLBIT, 2, 19 + BULLBIT, 17 + BULLBIT,
+        9 + BULLBIT, 11 + BULLBIT, 2, 13 + BULLBIT,
+        7 + BULLBIT, 9 + BULLBIT, 5 + BULLBIT, 2
     };
 
     for (int MapX = 0; MapX < SimWidth; MapX++)
     {
         for (int MapY = 0; MapY < SimHeight; MapY++)
         {
-            if (tileValue(MapX, MapY) == RiverEdge)
+            if (map[MapX][MapY] == REDGE)
             {
                 int bitindex = 0;
 
@@ -206,10 +220,10 @@ void SmoothRiver()
                     bitindex = bitindex << 1;
                     int Xtem = MapX + DX[z];
                     int Ytem = MapY + DY[z];
-                    if (coordinatesValid({ Xtem, Ytem }) &&
-                        ((maskedTileValue(Xtem, Ytem)) != Dirt) &&
-                        (((maskedTileValue(Xtem, Ytem)) < WOODS_LOW) ||
-                            ((maskedTileValue(Xtem, Ytem)) > WOODS_HIGH)))
+                    if (CoordinatesValid({ Xtem, Ytem }) &&
+                        ((map[Xtem][Ytem] & LOMASK) != DIRT) &&
+                        (((map[Xtem][Ytem] & LOMASK) < WOODS_LOW) ||
+                            ((map[Xtem][Ytem] & LOMASK) > WOODS_HIGH)))
                     {
                         bitindex++;
                     }
@@ -218,12 +232,12 @@ void SmoothRiver()
 
                 int temp = REdTab[bitindex & 15];
 
-                if ((temp != River) && (randomRange(0, 1)))
+                if ((temp != RIVER) && (RandomRange(0, 1)))
                 {
                     temp++;
                 }
 
-                tileValue(MapX, MapY) = temp;
+                map[MapX][MapY] = temp;
             }
         }
     }
@@ -233,25 +247,25 @@ void SmoothRiver()
 
 void TreeSplash(int xloc, int yloc)
 {
-    int dis = TreeLevel < 0 ? dis = randomRange(0, 150) + 50 : randomRange(0, 100 + (TreeLevel * 2)) + 50;
+    int dis = TreeLevel < 0 ? dis = RandomRange(0, 150) + 50 : RandomRange(0, 100 + (TreeLevel * 2)) + 50;
 
     MapX = xloc;
     MapY = yloc;
 
     for (int z = 0; z < dis; z++)
     {
-        int dir = randomRange(0, 7);
+        int dir = RandomRange(0, 7);
 
         MoveMap(dir);
 
-        if (!(coordinatesValid({ MapX, MapY })))
+        if (!(CoordinatesValid({ MapX, MapY })))
         {
             return;
         }
 
-        if ((maskedTileValue(MapX, MapY)) == Dirt)
+        if ((map[MapX][MapY] & LOMASK) == DIRT)
         {
-            tileValue(MapX, MapY) = Woods + BulldozableBurnableBits;
+            map[MapX][MapY] = WOODS + BLBNBIT;
         }
     }
 }
@@ -263,7 +277,7 @@ void DoTrees()
 
     if (TreeLevel < 0)
     {
-        Amount = randomRange(0, 100) + 50;
+        Amount = RandomRange(0, 100) + 50;
     }
     else
     {
@@ -272,8 +286,8 @@ void DoTrees()
 
     for (x = 0; x < Amount; x++)
     {
-        xloc = randomRange(0, SimWidth - 1);
-        yloc = randomRange(0, SimHeight - 1);
+        xloc = RandomRange(0, SimWidth - 1);
+        yloc = RandomRange(0, SimHeight - 1);
         TreeSplash(xloc, yloc);
     }
 
@@ -344,17 +358,17 @@ void DoLargeRiver()
         r2 = CurveLevel + 100;
     }
 
-    while (coordinatesValid({ MapX + 4, MapY + 4 }))
+    while (CoordinatesValid({ MapX + 4, MapY + 4 }))
     {
         PlopLargeRiver();
-        if (randomRange(0, r1) < 10)
+        if (RandomRange(0, r1) < 10)
         {
             Dir = LastDir;
         }
         else
         {
-            if (randomRange(0, r2) > 90) Dir++;
-            if (randomRange(0, r2) > 90) Dir--;
+            if (RandomRange(0, r2) > 90) Dir++;
+            if (RandomRange(0, r2) > 90) Dir--;
         }
         MoveMap(Dir);
     }
@@ -376,17 +390,17 @@ void DoSmallRiver()
         r2 = CurveLevel + 100;
     }
 
-    while (coordinatesValid({ MapX + 3, MapY + 3 }))
+    while (CoordinatesValid({ MapX + 3, MapY + 3 }))
     {
         PlopSmallRiver();
-        if (randomRange(0, r1) < 10)
+        if (RandomRange(0, r1) < 10)
         {
             Dir = LastDir;
         }
         else
         {
-            if (randomRange(0, r2) > 90) Dir++;
-            if (randomRange(0, r2) > 90) Dir--;
+            if (RandomRange(0, r2) > 90) Dir++;
+            if (RandomRange(0, r2) > 90) Dir--;
         }
         MoveMap(Dir);
     }
@@ -395,7 +409,7 @@ void DoSmallRiver()
 
 void DoRivers()
 {
-    LastDir = randomRange(0, 3);
+    LastDir = RandomRange(0, 3);
     Dir = LastDir;   
     DoLargeRiver();
     
@@ -407,7 +421,7 @@ void DoRivers()
 
     MapX = XStart;
     MapY = YStart;
-    LastDir = randomRange(0, 3);
+    LastDir = RandomRange(0, 3);
     DoSmallRiver();
 }
 
@@ -418,7 +432,7 @@ void MakeNakedIsland()
     {
         for (int y = 0; y < SimHeight; y++)
         {
-            tileValue(x, y) = River;
+            map[x][y] = RIVER;
         }
     }
     
@@ -426,7 +440,7 @@ void MakeNakedIsland()
     {
         for (int y = 5; y < SimHeight - 5; y++)
         {
-            tileValue(x, y) = Dirt;
+            map[x][y] = DIRT;
         }
     }
    
@@ -479,7 +493,7 @@ void MakeLakes()
 
     if (LakeLevel < 0)
     {
-        Lim1 = randomRange(0, 10);
+        Lim1 = RandomRange(0, 10);
     }
     else
     {
@@ -488,17 +502,17 @@ void MakeLakes()
 
     for (int t = 0; t < Lim1; t++)
     {
-        int  x = randomRange(0, SimWidth - 21) + 10;
-        int y = randomRange(0, SimHeight - 20) + 10;
+        int  x = RandomRange(0, SimWidth - 21) + 10;
+        int y = RandomRange(0, SimHeight - 20) + 10;
 
-        Lim2 = randomRange(0, 12) + 2;
+        Lim2 = RandomRange(0, 12) + 2;
 
         for (int z = 0; z < Lim2; z++)
         {
-            MapX = x - 6 + randomRange(0, 12);
-            MapY = y - 6 + randomRange(0, 12);
+            MapX = x - 6 + RandomRange(0, 12);
+            MapY = y - 6 + RandomRange(0, 12);
 
-            if (randomRange(0, 4))
+            if (RandomRange(0, 4))
             {
                 PlopSmallRiver();
             }
@@ -513,8 +527,8 @@ void MakeLakes()
 
 void GetRandStart()
 {
-    XStart = 40 + randomRange(0, SimWidth - 80);
-    YStart = 33 + randomRange(0, SimHeight - 67);
+    XStart = 40 + RandomRange(0, SimWidth - 80);
+    YStart = 33 + RandomRange(0, SimHeight - 67);
     MapX = XStart;
     MapY = YStart;
 }
@@ -522,7 +536,7 @@ void GetRandStart()
 
 void GenerateMap(int r)
 {
-    if (randomRange(0, 100) < 10) // chance that island is generated
+    if (RandomRange(0, 100) < 10) // chance that island is generated
     {
         MakeIsland();
         return;
@@ -553,16 +567,18 @@ void GenerateMap(int r)
     }
 }
 
+#include <iostream>
+#include "s_alloc.h"
 
-void GenerateCityFromSeed(int seed, CityProperties& properties, Budget& budget)
+void GenerateSomeCity(int seed, CityProperties& properties, Budget& budget)
 {
     ScenarioID = 0;
     CityTime = 0;
     InitSimLoad = 2;
-    DoInitialEval = false;
+    DoInitialEval = 0;
 
     initWillStuff();
-    updateFunds(budget);
+    UpdateFunds(budget);
     DoSimInit(properties, budget);
     Eval("UIDidGenerateNewCity");
 
@@ -572,5 +588,6 @@ void GenerateCityFromSeed(int seed, CityProperties& properties, Budget& budget)
 
 void GenerateNewCity(CityProperties& properties, Budget& budget)
 {
-    GenerateCityFromSeed(randomRange(0, std::numeric_limits<int>::max()), properties, budget);
+    GenerateSomeCity(RandomRange(0, std::numeric_limits<int>::max()), properties, budget);
+	maps.push_back(map);
 }

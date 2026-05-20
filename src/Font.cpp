@@ -1,6 +1,6 @@
 // ==================================================================================
 // = NAS2D
-// = Copyright © 2008 - 2026 Leeor Dicker
+// = Copyright © 2008 - 2022 Leeor Dicker
 // ==================================================================================
 // = NAS2D is distributed under the terms of the zlib license. You are free to copy,
 // = modify and distribute the software under the terms of the zlib license.
@@ -9,22 +9,18 @@
 // ==================================================================================
 #include "Font.h"
 
-#include "Math/PointInRectangleRange.h"
+#include "PointInRectangleRange.h"
 
-#if defined(__APPLE__)
-#include <SDL3_image/SDL_image.h>
-#include <SDL3_ttf//SDL_ttf.h>
-#else
-#include <SDL3_Image/SDL_image.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#endif
+#include "SDL_include.h"
+#include SDL_INCLUDE_IMAGE
+#include SDL_INCLUDE_TTF
 
 #include <cmath>
 #include <algorithm>
 #include <cstddef>
 #include <stdexcept>
 
-extern SDL_Renderer* MainWindowRenderer;
+extern SDL_Renderer* mainWindowRenderer;
 
 
 namespace {
@@ -58,7 +54,7 @@ namespace {
  * Instantiate a Font using a TrueType or OpenType font.
  *
  * \param	filePath	Path to a font file.
- * \param	ptSize		Point size of the font. Defaults to 12pt.
+ * \param	ptSize		MPoint size of the font. Defaults to 12pt.
  */
 Font::Font(const std::string& filePath, unsigned int ptSize) :
 	mResourceName{filePath + "_" + std::to_string(ptSize) + "pt"},
@@ -85,32 +81,7 @@ Vector<int> Font::glyphCellSize() const
 
 Vector<int> Font::size(std::string_view string) const
 {
-	const auto& gml = mFontInfo.metrics;
-	if (gml.empty()) { return { 0, 0 }; }
-
-	Vector<int> size{ 0, 0 };
-	int lineWidth = 0;
-	for (auto character : string)
-	{
-		if (character == '\n')
-		{
-			size.y += height();
-			size.x = std::max(size.x, lineWidth);
-			lineWidth = 0;
-		}
-		else
-		{
-			auto glyph = std::clamp<std::size_t>(static_cast<uint8_t>(character), 0, 255);
-			lineWidth += gml[glyph].advance;
-		}
-	}
-	if (!string.empty())
-	{
-		size.y += height();
-		size.x = std::max(size.x, lineWidth);
-	}
-
-	return size;
+	return {width(string), height()};
 }
 
 
@@ -121,7 +92,19 @@ Vector<int> Font::size(std::string_view string) const
  */
 int Font::width(std::string_view string) const
 {
-	return size(string).x;
+	if (string.empty()) { return 0; }
+
+	int width = 0;
+	auto& gml = mFontInfo.metrics;
+	if (gml.empty()) { return 0; }
+
+	for (auto character : string)
+	{
+		auto glyph = std::clamp<std::size_t>(static_cast<uint8_t>(character), 0, 255);
+		width += gml[glyph].advance + gml[glyph].minX;
+	}
+
+	return width;
 }
 
 
@@ -163,7 +146,7 @@ namespace {
 	 * Loads a TrueType or OpenType font from a file.
 	 *
 	 * \param	path	Path to the TTF or OTF font file.
-	 * \param	ptSize	Point size to use when loading the font.
+	 * \param	ptSize	MPoint size to use when loading the font.
 	 */
 	Font::FontInfo load(const std::string& path, unsigned int ptSize)
 	{
@@ -171,16 +154,16 @@ namespace {
 
 		if (TTF_WasInit() == 0)
 		{
-			if (!TTF_Init())
+			if (TTF_Init() != 0)
 			{
-				throw std::runtime_error("Unable to load font: " + std::string{ SDL_GetError() });
+				throw std::runtime_error("Unable to load font: " + std::string{TTF_GetError()});
 			}
 		}
 
-		TTF_Font* font = TTF_OpenFont(path.c_str(), static_cast<float>(ptSize));
+		TTF_Font* font = TTF_OpenFont(path.c_str(), ptSize);
 		if (!font)
 		{
-			throw std::runtime_error("Unable to load font: " + std::string{ SDL_GetError() });
+			throw std::runtime_error("Unable to load font: " + std::string{TTF_GetError()});
 		}
 
 		Font::FontInfo fontInfo;
@@ -191,12 +174,13 @@ namespace {
 		SDL_Surface* fontSurface = generateFontSurface(font, roundedCharSize);
 
 		fontInfo.pointSize = ptSize;
-		fontInfo.height = TTF_GetFontHeight(font);
-		fontInfo.ascent = TTF_GetFontAscent(font);
+		fontInfo.height = TTF_FontHeight(font);
+		fontInfo.ascent = TTF_FontAscent(font);
 		fontInfo.glyphSize = roundedCharSize;
 		fontInfo.texture = generateFontTexture(fontSurface, glm, roundedCharSize);
-		SDL_DestroySurface(fontSurface);
-		TTF_CloseFont(font);
+		fontInfo.font = font;
+		SDL_FreeSurface(fontSurface);
+		//TTF_CloseFont(font);
 
 		return fontInfo;
 	}
@@ -210,11 +194,11 @@ namespace {
 	{
 		fillInTextureCoordinates(glyphMetricsList, glyphSize);
 
-		SDL_Texture* out = SDL_CreateTextureFromSurface(MainWindowRenderer, fontSurface);
+		SDL_Texture* out = SDL_CreateTextureFromSurface(mainWindowRenderer, fontSurface);
 
 		if (!out)
 		{
-			throw std::runtime_error(std::string("Unable to create font texture: ") + SDL_GetError());
+			throw std::runtime_error(std::string("Unable to create font texture: ") + TTF_GetError());
 		}
 		
 		return out;
@@ -224,10 +208,10 @@ namespace {
 	SDL_Surface* generateFontSurface(TTF_Font* font, Vector<int> characterSize)
 	{
 		const auto matrixSize = characterSize * GLYPH_MATRIX_SIZE;
-		auto fontSurface = SDL_CreateSurface(matrixSize.x, matrixSize.y, SDL_PIXELFORMAT_RGBA32);
+		SDL_Surface* fontSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, matrixSize.x, matrixSize.y, BITS_32, MasksDefault.red, MasksDefault.green, MasksDefault.blue, MasksDefault.alpha);
 
 		SDL_Color white = { 255, 255, 255, 255 };
-		for (const auto glyphPosition : PointInRectangleRange(Rectangle{0, 0, GLYPH_MATRIX_SIZE, GLYPH_MATRIX_SIZE}))
+		for (const auto glyphPosition : PointInRectangleRange(MRectangle{0, 0, GLYPH_MATRIX_SIZE, GLYPH_MATRIX_SIZE}))
 		{
 			const std::size_t glyph = static_cast<std::size_t>(glyphPosition.y) * GLYPH_MATRIX_SIZE + glyphPosition.x;
 
@@ -245,7 +229,7 @@ namespace {
 			const auto pixelPosition = glyphPosition.skewBy(characterSize);
 			SDL_Rect rect = { pixelPosition.x, pixelPosition.y, 0, 0 };
 			SDL_BlitSurface(characterSurface, nullptr, fontSurface, &rect);
-			SDL_DestroySurface(characterSurface);
+			SDL_FreeSurface(characterSurface);
 		}
 		return fontSurface;
 	}
@@ -259,7 +243,7 @@ namespace {
 		{
 			Vector<int> sizeChar;
 			char text[2] = {static_cast<char>(i), 0};
-			TTF_GetStringSize(font, text, 0, &sizeChar.x, &sizeChar.y);
+			TTF_SizeText(font, text, &sizeChar.x, &sizeChar.y);
 			size = {std::max({size.x, sizeChar.x}), std::max({size.y, sizeChar.y})};
 		}
 		return size;
@@ -291,14 +275,14 @@ namespace {
 		for (Uint16 i = 0; i < ASCII_TABLE_COUNT; i++)
 		{
 			auto& metrics = glyphMetricsList.emplace_back();
-			TTF_GetGlyphMetrics(font, i, &metrics.minX, &metrics.maxX, &metrics.minY, &metrics.maxY, &metrics.advance);
+			TTF_GlyphMetrics(font, i, &metrics.minX, &metrics.maxX, &metrics.minY, &metrics.maxY, &metrics.advance);
 		}
 	}
 
 
 	void fillInTextureCoordinates(std::vector<Font::GlyphMetrics>& glyphMetricsList, Vector<int> glyphSize)
 	{
-		for (const auto glyphPosition : PointInRectangleRange(Rectangle{0, 0, GLYPH_MATRIX_SIZE, GLYPH_MATRIX_SIZE}))
+		for (const auto glyphPosition : PointInRectangleRange(MRectangle{0, 0, GLYPH_MATRIX_SIZE, GLYPH_MATRIX_SIZE}))
 		{
 			const std::size_t glyph = static_cast<std::size_t>(glyphPosition.y) * GLYPH_MATRIX_SIZE + glyphPosition.x;
 			const auto uvStart = glyphPosition.skewBy(glyphSize);

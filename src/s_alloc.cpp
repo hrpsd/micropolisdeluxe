@@ -1,20 +1,21 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "s_alloc.h"
 
 #include "EffectMap.h"
-#include "Map.h"
+#include "main.h"
 #include "Power.h"
 
-#include "Util.h"
+#include "w_util.h"
 
 #include <array>
 #include <map>
@@ -23,28 +24,28 @@
 
 /* Allocate Stuff */
 
-Point<int> SimulationTarget{};
+MPoint<int> SimulationTarget{};
 
 int CurrentTile; // unmasked tile value
 int CurrentTileMasked; // masked tile value
 
-int RoadCount, RailCount, BurningTileCount;
+int RoadTotal, RailTotal, FirePop;
 
-int ResidentialPopulationCount, CommercialPopulationCount, IndustrialPopulationCount, PopulationTotal, PreviousPopulationTotal;
-int ResidentialZoneCount, CommercialZoneCount, IndustrialZoneCount, CombinedZoneCount;
-int HospitalCount, ChurchCount, StadiumCount;
-int PoliceStationCount, FireStationCount;
-int CoalPowerPlantCount, NuclearPowerPlantCount, SeaPortCount, AirportCount;
+int ResPop, ComPop, IndPop, TotalPop, LastTotalPop;
+int ResZPop, ComZPop, IndZPop, TotalZPop; // zone counts
+int HospPop, ChurchPop, StadiumPop;
+int PolicePop, FireStPop;
+int CoalPop, NuclearPop, PortPop, APortPop;
 
-int HospitalBuildCount, ChurchBuildCount;
+int NeedHosp, NeedChurch;
 int CrimeAverage, PolluteAverage, LVAverage;
 
 int CityTime;
 int StartingYear;
 
-int ResidentialPopulationHistoryHighest;
-int CommercialPopulationHistoryHighest;
-int IndustrialPopulationHistoryHighest;
+int ResHisMax;
+int ComHisMax;
+int IndHisMax;
 
 int RoadEffect, PoliceEffect, FireEffect;
 
@@ -66,14 +67,14 @@ EffectMap FireProtectionMap({ EighthWorldWidth, EighthWorldHeight });
 
 EffectMap ComRate({ EighthWorldWidth, EighthWorldHeight });
 
-GraphHistory ResidentialPopulationHistory{};
-GraphHistory CommercialPopulationHistory{};
-GraphHistory IndustrialPopulationHistory{};
+GraphHistory ResHis{};
+GraphHistory ComHis{};
+GraphHistory IndHis{};
 
 GraphHistory MoneyHis{};
-GraphHistory PollutionHistory{};
-GraphHistory CrimeHistory{};
-GraphHistory MiscHistory{};
+GraphHistory PollutionHis{};
+GraphHistory CrimeHis{};
+GraphHistory MiscHis{};
 
 GraphHistory ResHis120Years{};
 GraphHistory ComHis120Years{};
@@ -111,14 +112,14 @@ namespace
 
     void resetHistoryArrays()
     {
-        ResidentialPopulationHistory.fill(0);
-        CommercialPopulationHistory.fill(0);
-        IndustrialPopulationHistory.fill(0);
+        ResHis.fill(0);
+        ComHis.fill(0);
+        IndHis.fill(0);
 
         MoneyHis.fill(0);
-        PollutionHistory.fill(0);
-        CrimeHistory.fill(0);
-        MiscHistory.fill(0);
+        PollutionHis.fill(0);
+        CrimeHis.fill(0);
+        MiscHis.fill(0);
 
         ResHis120Years.fill(0);
         ComHis120Years.fill(0);
@@ -129,7 +130,7 @@ namespace
         CrimeHis120Years.fill(0);
         MiscHis120Years.fill(0);
 
-        MiscHistory.fill(0);
+        MiscHis.fill(0);
         resetPowerMap();
     }
 };
@@ -145,9 +146,9 @@ void initMapArrays()
 
 bool moveSimulationTarget(SearchDirection direction)
 {
-    const Point<int> newTargetCoordinates{ SimulationTarget + AdjacentVector.at(direction) };
+    const MPoint<int> newTargetCoordinates{ SimulationTarget + AdjacentVector.at(direction) };
 
-    if (!coordinatesValid(newTargetCoordinates))
+    if (!CoordinatesValid(newTargetCoordinates))
     {
         return false;
     }

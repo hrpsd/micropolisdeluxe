@@ -1,24 +1,24 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "Evaluation.h"
 
 #include "Budget.h"
 #include "CityProperties.h"
-#include "Map.h"
 
 #include "s_alloc.h"
 #include "s_sim.h"
 
 #include "w_tk.h"
-#include "w_update.h"
+#include "w_util.h"
 
 #include <algorithm>
 
@@ -204,7 +204,7 @@ int deltaCityPopulation()
 }
 
 
-void EvalInit()
+void evalInit()
 {
     CityYes = 0;
     CityNo = 0;
@@ -219,7 +219,7 @@ void EvalInit()
 }
 
 
-void ChangeEval()
+void changeEval()
 {
     EvalChanged = true;
 }
@@ -227,16 +227,16 @@ void ChangeEval()
 
 void GetAssessedValue()
 {
-    int assesedValue = RoadCount * 5;
-    assesedValue += RailCount * 10;
-    assesedValue += PoliceStationCount * 1000;
-    assesedValue += FireStationCount * 1000;
-    assesedValue += HospitalCount * 400;
-    assesedValue += StadiumCount * 3000;
-    assesedValue += SeaPortCount * 5000;
-    assesedValue += AirportCount * 10000;
-    assesedValue += CoalPowerPlantCount * 3000;
-    assesedValue += NuclearPowerPlantCount * 6000;
+    int assesedValue = RoadTotal * 5;
+    assesedValue += RailTotal * 10;
+    assesedValue += PolicePop * 1000;
+    assesedValue += FireStPop * 1000;
+    assesedValue += HospPop * 400;
+    assesedValue += StadiumPop * 3000;
+    assesedValue += PortPop * 5000;
+    assesedValue += APortPop * 10000;
+    assesedValue += CoalPop * 3000;
+    assesedValue += NuclearPop * 6000;
     CityAssessedValue = assesedValue * 1000;
 }
 
@@ -244,7 +244,7 @@ void GetAssessedValue()
 void DoPopNum()
 {
     int oldCityPop{ CityPop };
-    CityPop = (ResidentialPopulationCount + (CommercialPopulationCount * 8) + (IndustrialPopulationCount * 8)) * 20;
+    CityPop = (ResPop + (ComPop * 8) + (IndPop * 8)) * 20;
     
     if (oldCityPop == 0)
     {
@@ -262,7 +262,7 @@ void VoteProblems()
     int problemIndex{}, voteCount{}, count{};
     while ((voteCount < 100) && (count < 600))
     {
-        if (randomRange(0, 300) < Problems[problemIndex].value)
+        if (RandomRange(0, 300) < Problems[problemIndex].value)
         {
             ++Problems[problemIndex].votes;
             ++voteCount;
@@ -305,10 +305,10 @@ int GetUnemployment()
 {
     float ratio{ 0.0f };
 
-    int base{ (CommercialPopulationCount + IndustrialPopulationCount) * 8 };
+    int base{ (ComPop + IndPop) * 8 };
     if (base)
     {
-        ratio = (static_cast<float>(ResidentialPopulationCount)) / base;
+        ratio = (static_cast<float>(ResPop)) / base;
     }
     else
     {
@@ -327,7 +327,7 @@ int GetUnemployment()
 
 int GetFire()
 {
-    return std::clamp(BurningTileCount * 5, 0, 255);
+    return std::clamp(FirePop * 5, 0, 255);
 }
 
 
@@ -366,12 +366,9 @@ void GetScore(const Budget& budget)
     if (RoadEffect < 32) { z = z - (32 - RoadEffect); }
     if (PoliceEffect < 1000) { z = static_cast<int>(z * (.9 + (PoliceEffect / 10000.1))); }
     if (FireEffect < 1000) { z = static_cast<int>(z * (.9 + (FireEffect / 10000.1))); }
-
-	const auto& rci = currentRCI();
-
-    if (rci.residentialDemand() < -1000) { z = static_cast<int>(z * .85); }
-    if (rci.commercialDemand() < -1000) { z = static_cast<int>(z * .85); }
-    if (rci.industrialDemand() < -1000) { z = static_cast<int>(z * .85); }
+    if (RValve < -1000) { z = static_cast<int>(z * .85); }
+    if (CValve < -1000) { z = static_cast<int>(z * .85); }
+    if (IValve < -1000) { z = static_cast<int>(z * .85); }
 
     SM = 1.0;
     if ((CityPop == 0) || (deltaCityPop == 0))
@@ -414,7 +411,7 @@ void DoVotes()
     CityNo = 0;
     for (int z{}; z < 100; z++)
     {
-        if (randomRange(0, 1000) < CityScore)
+        if (RandomRange(0, 1000) < CityScore)
         {
             CityYes++;
         }
@@ -445,26 +442,26 @@ void DoProblems(const Budget& budget)
 }
 
 
-void CityEvaluation(const Budget& budget)
+void cityEvaluation(const Budget& budget)
 {
-    if (PopulationTotal)
+    if (TotalPop)
     {
         GetAssessedValue();
         DoPopNum();
         DoProblems(budget);
         GetScore(budget);
         DoVotes();
-        ChangeEval();
+        changeEval();
     }
     else
     {
-        EvalInit();
-        ChangeEval();
+        evalInit();
+        changeEval();
     }
 }
 
 
-void buildEvaluationReport(const CityProperties& properties)
+void doScoreCard(const CityProperties& properties)
 {
     CurrentEvaluation =
     {
@@ -486,21 +483,21 @@ void buildEvaluationReport(const CityProperties& properties)
         },
         std::to_string(cityPopulation()),
         std::to_string(deltaCityPopulation()),
-        numberToDollarDecimal(cityAssessedValue()),
+        NumberToDollarDecimal(cityAssessedValue()),
         CityClassString[static_cast<int>(cityClass())],
         CityLevelString[properties.GameLevel()],
         std::to_string(cityYes()) + "%",
         std::to_string(cityNo()) + "%",
-        std::to_string(currentYear())
+        std::to_string(CurrentYear())
     };
 }
 
 
-void refreshCityEvaluation(const CityProperties& properties)
+void scoreDoer(const CityProperties& properties)
 {
     if (EvalChanged)
     {
-        buildEvaluationReport(properties);
+        doScoreCard(properties);
         EvalChanged = false;
     }
 }

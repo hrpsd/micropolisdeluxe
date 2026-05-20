@@ -1,31 +1,33 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "s_msg.h"
 
+#include "main.h"
+
 #include "Budget.h"
 #include "Evaluation.h"
-#include "main.h"
+
 #include "s_sim.h"
+
 #include "w_resrc.h"
 #include "w_sound.h"
 #include "w_tk.h"
-#include "Util.h"
+#include "w_util.h"
 
-#include "Math/Point.h"
-
-#include "UI/InterfaceManager.h"
+#include "Point.h"
 
 #include <algorithm>
-#include <memory>
 #include <string>
+#include <queue>
 
 
 namespace
@@ -39,14 +41,12 @@ namespace
 
     bool AutoGotoLocation{ false };
 
-    Point<int> messageLocation{};
-    std::string lastMessage;
+    MPoint<int> messageLocation{};
+    std::deque<std::string> lastMessages;
 
     constexpr auto DefaultMessageDisplayTime{ 3000 };
 
     int messageDisplayTime{ DefaultMessageDisplayTime };
-
-	std::weak_ptr<InterfaceManager> interfaceManager;
 
     int TickCount()
     {
@@ -54,12 +54,6 @@ namespace
     }
 
 };
-
-
-void shareInterfaceManager(std::weak_ptr<InterfaceManager> manager)
-{
-	interfaceManager = manager;
-}
 
 
 void MessageDisplayTime(int time)
@@ -88,13 +82,20 @@ bool AutoGotoMessageLocation()
 
 void LastMessage(const std::string& message)
 {
-    lastMessage = message;
+	printf("LAST MESSAGE: \"%s\"\n", message.c_str());
+	
+	lastMessages.push_front(message);
+	
+	while (lastMessages.size() > 8)
+	{
+		lastMessages.pop_back();
+	}
 }
 
 
-const std::string& LastMessage()
+std::deque<std::string>& LastMessages()
 {
-    return lastMessage;
+    return lastMessages;
 }
 
 
@@ -116,19 +117,22 @@ NotificationId MessageId()
 }
 
 
-void MessageId(NotificationId id)
+void MessageId(NotificationId id, MPoint<int> location)
 {
+    printf("MessageId %d\n", (int)id);
     messageId = id;
+    MessageLocation(location);
+    doMessage();
 }
 
 
-void MessageLocation(Point<int> location)
+void MessageLocation(MPoint<int> location)
 {
     messageLocation = location;
 }
 
 
-const Point<int>& MessageLocation()
+const MPoint<int>& MessageLocation()
 {
     return messageLocation;
 }
@@ -136,18 +140,17 @@ const Point<int>& MessageLocation()
 
 void ClearMes()
 {
-    MessageId(NotificationId::None);
-    MessageLocation({ 0, 0 });
+    MessageId(NotificationId::None, MPoint<int>{ -1, -1 });
+    MessageLocation({ -1, -1 });
     LastPictureId = 0;
     LastMessageTime(0);
-    LastMessage("");
-    interfaceManager.lock()->dashboardWindow().setMessage("");
+    //LastMessage("");
 }
 
 
-void SendMes(NotificationId id)
+int SendMes(NotificationId id, MPoint<int> location)
 {
-    MessageId(id);
+    MessageId(id, location);
 
     if (id == NotificationId::None)
     {
@@ -155,32 +158,36 @@ void SendMes(NotificationId id)
     }
 
     LastMessageTime(TickCount());
+
+    return 1;
 }
 
 
 void SendMesAt(NotificationId id, int x, int y)
 {
-    SendMes(id);
-
-    if (id != NotificationId::None)
-    {
-        MessageLocation({ x, y });
-    }
+    SendMes(id, MPoint<int>{ x, y });
 }
 
 
 void SetMessageField(const std::string& msg)
 {
-    if (LastMessage() != msg)
+    printf("SetMessageField \"%s\"\n", msg.c_str());
+    if (msg != "" && (LastMessages().empty() || LastMessages().front() != msg))
     {
         LastMessage(msg);
-		interfaceManager.lock()->dashboardWindow().setMessage(msg);
+		
+		if ((int)MessageId() > 8)
+		{
+			showPopup(-(int)MessageId());
+		}
     }
 }
 
 
 void DoAutoGoto(int x, int y, const std::string& msg)
 {
+    mustGoto(x, y);
+    
     SetMessageField(msg);
     Eval(std::string("UIAutoGoto " + std::to_string(x) + " " + std::to_string(y)).c_str());
 }
@@ -285,7 +292,7 @@ void CheckGrowth()
         return;
     }
 
-    int currentPopulation = ((ResidentialPopulationCount)+(CommercialPopulationCount * 8) + (IndustrialPopulationCount * 8)) * 20;
+    int currentPopulation = ((ResPop)+(ComPop * 8) + (IndPop * 8)) * 20;
     NotificationId growthMessageId = NotificationId::None;
 
     if (LastCityPop)
@@ -336,56 +343,56 @@ void SendMessages(const Budget& budget)
 
     CheckGrowth();
 
-    CombinedZoneCount = ResidentialZoneCount + CommercialZoneCount + IndustrialZoneCount;
-    int PowerPop = NuclearPowerPlantCount + CoalPowerPlantCount;
+    TotalZPop = ResZPop + ComZPop + IndZPop;
+    int PowerPop = NuclearPop + CoalPop;
 
     switch (CityTime % 64)
     {
 
     case 1:
-        if ((CombinedZoneCount / 4) >= ResidentialZoneCount) /* need Res */
+        if ((TotalZPop / 4) >= ResZPop) /* need Res */
         {
             SendMes(NotificationId::ResidentialNeeded);
         }
         break;
 
     case 5:
-        if ((CombinedZoneCount / 8) >= CommercialZoneCount) /* need Com */
+        if ((TotalZPop / 8) >= ComZPop) /* need Com */
         {
             SendMes(NotificationId::CommercialNeeded);
         }
         break;
 
     case 10:
-        if ((CombinedZoneCount / 8) >= IndustrialZoneCount) /* need Ind */
+        if ((TotalZPop / 8) >= IndZPop) /* need Ind */
         {
             SendMes(NotificationId::IndustrialNeeded);
         }
         break;
 
     case 14:
-        if ((CombinedZoneCount > 10) && ((CombinedZoneCount << 1) > RoadCount))
+        if ((TotalZPop > 10) && ((TotalZPop << 1) > RoadTotal))
         {
             SendMes(NotificationId::RoadsNeeded);
         }
         break;
 
     case 18:
-        if ((CombinedZoneCount > 50) && (CombinedZoneCount > RailCount))
+        if ((TotalZPop > 50) && (TotalZPop > RailTotal))
         {
             SendMes(NotificationId::RailNeeded);
         }
         break;
 
     case 22:
-        if ((CombinedZoneCount > 10) && (PowerPop == 0)) /* need Power */
+        if ((TotalZPop > 10) && (PowerPop == 0)) /* need Power */
         {
             SendMes(NotificationId::PowerNeeded);
         }
         break;
 
     case 26:
-        if ((ResidentialPopulationCount > 500) && (StadiumCount == 0)) /* need Stad */
+        if ((ResPop > 500) && (StadiumPop == 0)) /* need Stad */
         {
             SendMes(NotificationId::StadiumNeeded);
             ResCap = 1;
@@ -397,7 +404,7 @@ void SendMessages(const Budget& budget)
         break;
 
     case 28:
-        if ((IndustrialPopulationCount > 70) && (SeaPortCount == 0))
+        if ((IndPop > 70) && (PortPop == 0))
         {
             SendMes(NotificationId::SeaportNeeded);
             IndCap = 1;
@@ -406,7 +413,7 @@ void SendMessages(const Budget& budget)
         break;
 
     case 30:
-        if ((CommercialPopulationCount > 100) && (AirportCount == 0))
+        if ((ComPop > 100) && (APortPop == 0))
         {
             SendMes(NotificationId::AirportNeeded);
             ComCap = 1;
@@ -443,14 +450,14 @@ void SendMessages(const Budget& budget)
         break;
 
     case 45:
-        if ((PopulationTotal > 60) && (FireStationCount == 0))
+        if ((TotalPop > 60) && (FireStPop == 0))
         {
             SendMes(NotificationId::FireDepartmentNeeded);
         }
         break;
 
     case 48:
-        if ((PopulationTotal > 60) && (PoliceStationCount == 0))
+        if ((TotalPop > 60) && (PolicePop == 0))
         {
             SendMes(NotificationId::PoliceDepartmentNeeded);
         }
@@ -464,21 +471,21 @@ void SendMessages(const Budget& budget)
         break;
 
     case 54:
-        if ((RoadEffect < 20) && (RoadCount > 30))
+        if ((RoadEffect < 20) && (RoadTotal > 30))
         {
             SendMes(NotificationId::RoadsDeteriorating);
         }
         break;
 
     case 57:
-        if ((FireEffect < 700) && (PopulationTotal > 20))
+        if ((FireEffect < 700) && (TotalPop > 20))
         {
             SendMes(NotificationId::FireDefunded);
         }
         break;
 
     case 60:
-        if ((PoliceEffect < 700) && (PopulationTotal > 20))
+        if ((PoliceEffect < 700) && (TotalPop > 20))
         {
             SendMes(NotificationId::PoliceDefunded);
         }
@@ -496,7 +503,7 @@ void SendMessages(const Budget& budget)
 
 void doMessage()
 {
-    bool firstTime = false;
+    bool firstTime = true;
     
     if (MessageId() == NotificationId::None)
     {
@@ -505,8 +512,8 @@ void doMessage()
     else if (MessageId() != NotificationId::None &&
              TickCount() - LastMessageTime() > messageDisplayTime)
     {
-        ClearMes();
-        return;
+        //ClearMes();
+        //return;
     }
 
     if (firstTime)
@@ -514,15 +521,15 @@ void doMessage()
         switch (MessageId())
         {
         case NotificationId::TrafficJamsReported:
-            if (randomRange(0, 5) == 1)
+            if (RandomRange(0, 5) == 1)
             {
                 MakeSound("city", "HonkHonk-Med");
             }
-            else if (randomRange(0, 5) == 1)
+            else if (RandomRange(0, 5) == 1)
             {
                 MakeSound("city", "HonkHonk-Low");
             }
-            else if (randomRange(0, 5) == 1)
+            else if (RandomRange(0, 5) == 1)
             {
                 MakeSound("city", "HonkHonk-High");
             }
@@ -540,7 +547,8 @@ void doMessage()
             break;
 
         case NotificationId::MonsterReported:
-            MakeSound("city", "Monster -speed [MonsterSpeed]");
+            //MakeSound("city", "Monster -speed [MonsterSpeed]");
+			MakeSound("city", "Monster");
             break;
 
         case NotificationId::FirebombingReported:
@@ -567,15 +575,15 @@ void doMessage()
 
     if (MessageId() != NotificationId::None)
     {
-        if (MessageLocation() != Point<int>{0, 0})
+        if (MessageLocation() != MPoint<int>{-1, -1})
         {
             // TODO: draw goto button
         }
 
-        if (AutoGotoMessageLocation() && (MessageLocation() != Point<int>{0, 0}))
+        if (AutoGotoMessageLocation() && (MessageLocation() != MPoint<int>{0, 0}))
         {
             DoAutoGoto(MessageLocation().x, MessageLocation().y, NotificationString(MessageId()));
-            MessageLocation({ 0, 0 });
+            MessageLocation({ -1, -1 });
         }
         else
         {

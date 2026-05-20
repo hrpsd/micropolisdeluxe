@@ -1,11 +1,12 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "CityProperties.h"
@@ -19,48 +20,48 @@
 #include "Scan.h"
 #include "Sprite.h"
 
-#include "Util.h"
+#include "w_util.h"
 
 #include <algorithm>
 
 
 bool tileIsNuclear(const int tile)
 {
-    return ((tile & LowerMask) == NuclearPower);
+    return ((tile & LOMASK) == NUCLEAR);
 }
 
 
 bool tileIsArsonable(const int tile)
 {
-    return !(tile & ZonedBit) && (tile & BurnableBit);
+    return !(tile & ZONEBIT) && (tile & BURNBIT);
 }
 
 
 bool tileIsRiverEdge(const int tile)
 {
-    const int masked = tile & LowerMask;
-    return masked >= RiverEdgeFirst && masked <= RiverEdgeLast;
+    const int masked = tile & LOMASK;
+    return masked >= FIRSTRIVEDGE && masked <= LASTRIVEDGE;
 }
 
 
 bool tileIsFloodable(const int tile)
 {
-    const int masked = tile & LowerMask;
-    return masked == Dirt || ((tile & BulldozableBit) || (tile & BurnableBit));
+    const int masked = tile & LOMASK;
+    return masked == DIRT || ((tile & BULLBIT) || (tile & BURNBIT));
 }
 
 
 bool canSpreadFloodTo(const int tile)
 {
-    const int masked = tile & LowerMask;
-    return (masked == Dirt) || (tile & BurnableBit) || (masked >= Rubble && (masked <= RubbleLast));
+    const int masked = tile & LOMASK;
+    return (masked == DIRT) || (tile & BURNBIT) || (masked >= RUBBLE && (masked <= LASTRUBBLE));
 }
 
 
 bool tileIsVulnerable(const int tile)
 {
-    const unsigned int unmasked = tile & LowerMask;
-    return (unmasked >= ResidentialBase && unmasked <= ZoneLast) || (tile & ZonedBit);
+    const unsigned int unmasked = tile & LOMASK;
+    return !(unmasked < ResidentialBase) || (unmasked > LASTZONE) || (tile & ZONEBIT);
 }
 
 
@@ -94,7 +95,7 @@ void MakeMeltdown()
 
 void FireBomb()
 {
-    crashPosition({ randomRange(0, SimWidth - 1), randomRange(0, SimHeight - 1) });
+    crashPosition({ RandomRange(0, SimWidth - 1), RandomRange(0, SimHeight - 1) });
     generateExplosion(crashPosition());
     ClearMes();
     SendMesAt(NotificationId::FirebombingReported, crashPosition().x, crashPosition().y);
@@ -106,21 +107,27 @@ void MakeEarthquake()
     DoEarthQuake();
     SendMesAt(NotificationId::EarthquakeReported, cityCenterOfMass().x, cityCenterOfMass().y);
 
-    const auto damageAttempts = randomRange(300, 1000);
+    int time = RandomRange(0, 700) + 300;
 
-    for (size_t attempt = 0; attempt < damageAttempts; attempt++)
+    for (int z = 0; z < time; z++)
     {
-		const Point<int> position{ randomRange(0, SimWidth - 1), randomRange(0, SimHeight - 1) };
+        int x = RandomRange(0, SimWidth - 1);
+        int y = RandomRange(0, SimHeight - 1);
 
-        if (tileIsVulnerable(tileValue(position)))
+        if ((x < 0) || (x > (SimWidth - 1)) || (y < 0) || (y > (SimHeight - 1)))
         {
-            if (randomRange(0, 3) != 0)
+            continue;
+        }
+
+        if (tileIsVulnerable(map[x][y]))
+        {
+            if (z & 0x3)
             {
-                tileValue(position) = (Rubble + randomRange(0, 3)) | BulldozableBit;
+                map[x][y] = (RUBBLE + BULLBIT) + (Rand16() & 3);
             }
             else
             {
-				tileValue(position) = (FireBase + randomRange(0, 7)) | AnimatedBit;
+                map[x][y] = (FIRE + ANIMBIT) + (Rand16() & 7);
             }
         }
     }
@@ -131,16 +138,16 @@ void MakeFire()
 {
     for (int t = 0; t < 40; t++)
     {
-        const int x = randomRange(0, SimWidth - 1);
-        const int y = randomRange(0, SimHeight - 1);
-        const int cell = tileValue(x, y);
+        const int x = RandomRange(0, SimWidth - 1);
+        const int y = RandomRange(0, SimHeight - 1);
+        const int cell = map[x][y];
 
         if(tileIsArsonable(cell))
         {
             const int tile = maskedTileValue(x, y);
-            if ((tile > RiverEdgeLast) && (tile < ZoneLast))
+            if ((tile > LASTRIVEDGE) && (tile < LASTZONE))
             {
-                tileValue(x, y) = FireBase + randomRange(0, 7) | AnimatedBit;
+                map[x][y] = FIRE + RandomRange(0, 7) | ANIMBIT;
                 SendMesAt(NotificationId::FireReported, x, y);
                 return;
             }
@@ -156,8 +163,8 @@ void MakeFlood()
 
     for (int iteration = 0; iteration < 300; ++iteration)
     {
-        const int cellX = randomRange(0, SimWidth - 1);
-        const int cellY = randomRange(0, SimHeight - 1);
+        const int cellX = RandomRange(0, SimWidth - 1);
+        const int cellY = RandomRange(0, SimHeight - 1);
         const int cell = tileValue(cellX, cellY);
 
         if (tileIsRiverEdge(cell))
@@ -166,11 +173,11 @@ void MakeFlood()
             {
                 const int floodX = cellX + Dx[t];
                 const int floodY = cellY + Dy[t];
-                if (coordinatesValid({ floodX, floodY }))
+                if (CoordinatesValid({ floodX, floodY }))
                 {
                     if(tileIsFloodable(cell))
                     {
-                        tileValue(floodX, floodY) = Flood;
+                        map[floodX][floodY] = FLOOD;
                         FloodCount = 30;
                         SendMesAt(NotificationId::FloodingReported, floodX, floodY);
                         FloodX = floodX;
@@ -193,21 +200,21 @@ void DoFlood()
     {
         for (int i = 0; i < 4; ++i)
         {
-            if (randomRange(0, 7) == 0)
+            if (RandomRange(0, 7) == 0)
             {
                 int x = SimulationTarget.x + Dx[i];
                 int y = SimulationTarget.y + Dy[i];
-                if (coordinatesValid({ x, y }))
+                if (CoordinatesValid({ x, y }))
                 {
-                    int cell = tileValue(x, y);
+                    int cell = map[x][y];
 
                     if(canSpreadFloodTo(cell))
                     {
-                        if (cell & ZonedBit)
+                        if (cell & ZONEBIT)
                         {
-                            condemnZone(x, y, cell);
+                            FireZone(x, y, cell);
                         }
-                        tileValue(x, y) = Flood + randomRange(0, 2);
+                        map[x][y] = FLOOD + RandomRange(0, 2);
                     }
                 }
             }
@@ -215,9 +222,9 @@ void DoFlood()
     }
     else
     {
-        if (randomRange(0, 15) == 0)
+        if (RandomRange(0, 15) == 0)
         {
-            tileValue(SimulationTarget.x, SimulationTarget.y) = Dirt;
+            map[SimulationTarget.x][SimulationTarget.y] = 0;
         }
     }
 }
@@ -315,16 +322,11 @@ void DoDisasters(CityProperties& properties)
     {
         ScenarioDisaster();
     }
-
-    if (!gameplayOptions().disastersEnabled)
-    {
-        return;
-    }
     
-    int disasterChance = randomRange(0, DisChance[properties.GameLevel()]);
+    int disasterChance = RandomRange(0, DisChance[properties.GameLevel()]);
     if (disasterChance == 0)
     {
-        int disasterType = randomRange(0, 8);
+        int disasterType = RandomRange(0, 8);
         switch (disasterType)
         {
         case 0:

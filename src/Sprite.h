@@ -1,19 +1,19 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #pragma once
 
+#include "Point.h"
 #include "Texture.h"
-
-#include "Math/Point.h"
-#include "Math/Vector.h"
+#include "Vector.h"
 
 #include <string>
 #include <vector>
@@ -36,18 +36,18 @@ struct SimSprite
 	Type type{ 0 };
 	int frame{ 0 };
 	
-	Point<int> position{};
-	Point<int> origin{};
-	Point<int> offset{};
+	MPoint<int> position{};
+	MPoint<int> origin{};
+	MPoint<int> offset{};
 	Vector<int> hot{};
-	Point<int> destination{};
+	MPoint<int> destination{};
 
 	Vector<int> size{};
 	
 	int count{ 0 };
-	int sound_count{ 0 };
+	int mSoundCount{ 0 };
 	int dir{ 0 };
-	int new_dir{ 0 };
+	int mNewDir{ 0 };
 	int step{ 0 };
 	int flag{ 0 };
 	int turn{ 0 };
@@ -60,20 +60,20 @@ struct SimSprite
 };
 
 
-Point<int>& crashPosition();
-void crashPosition(const Point<int>& position);
+MPoint<int>& crashPosition();
+void crashPosition(const MPoint<int>& position);
 
 SimSprite* getSprite(SimSprite::Type type);
 void drawSprites();
 void destroyAllSprites();
 void updateSprites();
 
-void generateHelicopter(const Point<int>& position);
-void generateAirplane(const Point<int>& position);
+void generateHelicopter(const MPoint<int>& position);
+void generateAirplane(const MPoint<int>& position);
 void generateShip();
-void generateTrain(const Point<int>& position);
+void generateTrain(const MPoint<int>& position);
 
-void makeExplosionAt(const Point<int>& position);
-void generateExplosion(const Point<int>& position);
+void makeExplosionAt(const MPoint<int>& position);
+void generateExplosion(const MPoint<int>& position);
 void generateTornado();
 void generateMonster();

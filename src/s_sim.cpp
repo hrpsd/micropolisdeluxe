@@ -1,42 +1,40 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "s_sim.h"
 
 #include "Budget.h"
 #include "CityProperties.h"
-#include "Constants.h"
-#include "CycleCounter.h"
 #include "Evaluation.h"
 
+#include "main.h"
 #include "Map.h"
 
+#include "Point.h"
 #include "Power.h"
-
-#include "RCI.h"
 
 #include "s_alloc.h"
 #include "s_disast.h"
 #include "s_msg.h"
 
-#include "Util.h"
+#include "w_util.h"
 
 #include "Scan.h"
 #include "Sprite.h"
 #include "Traffic.h"
 #include "Zone.h"
 
-#include "Math/Point.h"
+#include "gameOptions.h"
 
-
-#include <SDL3/SDL.h>
+#include "SDL_include.h"
 
 #include <algorithm>
 #include <iostream>
@@ -44,18 +42,11 @@
 
 /* Simulation */
 
-namespace
-{
-    constexpr auto SimCycleSize = 1024;
-
-    CycleCounter<SimCycleSize> SimPhaseCounter;
-    CycleCounter<SimCycleSize> SimCycleCounter;
-}
-
 constexpr auto CensusRate = 4;
 constexpr auto TaxFrequency = 48;
 
 int CrimeRamp, PolluteRamp ;
+int RValve, CValve, IValve;
 int ResCap, ComCap, IndCap;
 float EMarket = 4.0;
 int DisasterEvent;
@@ -65,116 +56,72 @@ int ScoreWait;
 int PoweredZoneCount;
 int UnpoweredZoneCount;
 int AvCityTax;
-
-bool DoInitialEval = false;
+int Scycle = 0;
+int Fcycle = 0;
+int DoInitialEval = 0;
 int MeltX, MeltY;
-
-
-namespace
-{
-	RCI rci;
-
-	/**
-	 * Fire Protection Thresholds
-	 * 0 = No Fire Protection
-	 * 1 = Minimal fire protection (at least one fire station within range)
-	 * 21 = Good coverage (fire station within range of the tile)
-	 * 101 = Excellent coverage (fire station very close to the tile)
-	 */
-	static constexpr std::array<int, 4> FireProtectionThresholds = { 0, 1, 21, 101 };
-
-	/**
-	 * Fire Burnout Rates
-	 * 10 (no protection) = 10% chance of burning out each cycle
-	 * 3 (minimal protection) = ~33% chance of burning out each cycle
-	 * 2 (good coverage) = ~50% chance of burning out each cycle
-	 * 1 (excellent coverage) = 100% chance of burning out each cycle
-	 */
-	static constexpr std::array<int, 4> BurnoutRates = { 10, 3, 2, 1 };
-
-	/**
-	 * Convert fire protection level to burnout rate index
-	 * Uses binary search to find the appropriate threshold tier
-	 */
-	int getBurnoutRateIndex(int fireProtection)
-	{
-		auto thresholdIt = std::upper_bound(FireProtectionThresholds.begin(), FireProtectionThresholds.end(), fireProtection);
-        return static_cast<int>(std::distance(FireProtectionThresholds.begin(), thresholdIt) - 1);
-	}
-
-
-    int getBurnoutRate(int fireProtection)
-    {
-        return BurnoutRates[getBurnoutRateIndex(fireProtection)];
-	}
-
-
-    void tryFireBurnout(const Point<int>& position)
-    {
-        int fireProtection = FireProtectionMap.value(position.skewInverseBy({ 8, 8 }));
-        if (!randomRange(0, getBurnoutRate(fireProtection)))
-        {
-            tileValue(position.x, position.y) = Rubble + randomRange(0, 3) | BulldozableBit;
-        }
-	}
-
-
-	void explodeIfIndustrial(const Point<int>& position, int tile)
-    {
-        const auto maskedValue = maskedTileValue(tile);
-        if (maskedValue > IndustrialZoneBase && maskedValue <= PortLast)
-        {
-            makeExplosionAt(position.skewBy({ 16, 16 }));
-        }
-    }
-
-
-	void propagateFireTo(const Point<int>& position)
-    {
-        const int tile = tileValue(position);
-        if (tileCanBurn(tile))
-        {
-            if (tileIsZoned(tile))
-            {
-                condemnZone(position.x, position.y, tile);
-				explodeIfIndustrial(position, tile);
-            }
-
-            tileValue(position) = (FireBase + randomRange(0, 3)) | AnimatedBit;
-        }
-    }
-}
 
 
 void DoFire()
 {
-    for (const auto [direction, vector] : SearchDirectionVectors)
+    static int DX[4] = { -1,  0,  1,  0 };
+    static int DY[4] = { 0, -1,  0,  1 };
+
+    for (int z = 0; z < 4; z++)
     {
-        // 12.5% chance to continue propagation in this direction
-		if ((rand16() & 7))
+        if (!(Rand16() & 7))
         {
-           continue;
+            int Xtem = SimulationTarget.x + DX[z];
+            int Ytem = SimulationTarget.y + DY[z];
+            if (CoordinatesValid({ Xtem, Ytem }))
+            {
+                int c = map[Xtem][Ytem];
+                if (c & BURNBIT)
+                {
+                    if (c & ZONEBIT)
+                    {
+                        FireZone(Xtem, Ytem, c);
+                        if ((c & LOMASK) > IZB) //  Explode
+                        {
+                            makeExplosionAt({ (Xtem * 16) + 8, (Ytem * 16) + 8 });
+                        }
+                    }
+                    map[Xtem][Ytem] = FIRE + RandomRange(0, 3) + ANIMBIT;
+                }
+            }
         }
-
-		const auto adjacentPosition = SimulationTarget + vector;
-        if(coordinatesValid(adjacentPosition))
-        {
-            propagateFireTo(adjacentPosition);
-		}
     }
-
-    tryFireBurnout(SimulationTarget);
+   
+    int z = FireProtectionMap.value(SimulationTarget.skewInverseBy({ 8, 8 }));
+    
+    int Rate = 10;
+    if (z)
+    {
+        Rate = 3;
+        if (z > 20)
+        {
+            Rate = 2;
+        }
+        if (z > 100)
+        {
+            Rate = 1;
+        }
+    }
+    if (!RandomRange(0, Rate))
+    {
+        map[SimulationTarget.x][SimulationTarget.y] = RUBBLE + RandomRange(0, 3) + BULLBIT;
+    }
 }
 
 
 void DoAirport()
 {
-    if (!(randomRange(0, 5)))
+    if (!(RandomRange(0, 5)))
     {
         generateAirplane(SimulationTarget);
         return;
     }
-    if (!(randomRange(0, 12)))
+    if (!(RandomRange(0, 12)))
     {
         generateHelicopter(SimulationTarget);
     }
@@ -189,30 +136,30 @@ void DoMeltdown(const int x, const int y)
     {
         for (int col = (y - 1); col < (y + 3); ++col)
         {
-            tileValue(row, col) = FireBase + randomRange(0, 3) | AnimatedBit;
+            map[row][col] = FIRE + RandomRange(0, 3) | ANIMBIT;
         }
     }
 
     for (int i = 0; i < 200; ++i)
     {
-        const int radiationX = x - 20 + randomRange(0, 40);
-        const int radiationY = y - 15 + randomRange(0, 30);
+        const int radiationX = x - 20 + RandomRange(0, 40);
+        const int radiationY = y - 15 + RandomRange(0, 30);
 
-        if (!coordinatesValid({ radiationX, radiationY }))
+        if (!CoordinatesValid({ radiationX, radiationY }))
         {
             continue;
         }
 
-        const int tile = tileValue(radiationX, radiationY);
+        const int tile = map[radiationX][radiationY];
 
-        if (tile & ZonedBit)
+        if (tile & ZONEBIT)
         {
             continue;
         }
 
-        if ((tile & BurnableBit) || tile == Dirt)
+        if ((tile & BURNBIT) || tile == DIRT)
         {
-            tileValue(radiationX, radiationY) = RadiationTile;
+            map[radiationX][radiationY] = RADTILE;
         }
     }
 
@@ -221,27 +168,27 @@ void DoMeltdown(const int x, const int y)
 }
 
 
-void DoRail(const Point<int>& position)
+void DoRail(const MPoint<int>& position)
 {
-    RailCount++;
+    RailTotal++;
     generateTrain(position);
    
     if (RoadEffect < 30) // Deteriorating  Rail
     {
-        if (randomRange(0, 511) == 0)
+        if (RandomRange(0, 511) == 0)
         {
             const unsigned int tile = tileValue(position.x, position.y);
-            if (!(tile & ConductiveBit))
+            if (!(tile & CONDBIT))
             {
-                if (RoadEffect < randomRange(0, 31))
+                if (RoadEffect < RandomRange(0, 31))
                 {
-                    if (maskedTileValue(tile) < (RailBase + 2))
+                    if (maskedTileValue(tile) < (RAILBASE + 2))
                     {
-                        tileValue(position.x, position.y) = River;
+                        map[position.x][position.y] = RIVER;
                     }
                     else
                     {
-                        tileValue(position.x, position.y) = Rubble + randomRange(0, 3) | BulldozableBit;
+                        map[position.x][position.y] = RUBBLE + RandomRange(0, 3) + BULLBIT;
                     }
                     return;
                 }
@@ -253,9 +200,9 @@ void DoRail(const Point<int>& position)
 
 void DoRadTile()
 {
-    if (randomRange(0, 4095) == 0) // Radioactive decay
+    if (RandomRange(0, 4095) == 0) // Radioactive decay
     {
-        tileValue(SimulationTarget.x, SimulationTarget.y) = Dirt;
+        map[SimulationTarget.x][SimulationTarget.y] = DIRT;
     }
 }
 
@@ -299,58 +246,58 @@ bool DoBridge()
   static int HDx[7] = { -2,  2, -2, -1,  0,  1,  2 };
   static int HDy[7] = { -1, -1,  0,  0,  0,  0,  0 };
   static int HBRTAB[7] = {
-    HBRDG1 | BulldozableBit, HBRDG3 | BulldozableBit, HBRDG0 | BulldozableBit,
-    River, BRWH | BulldozableBit, River, HBRDG2 | BulldozableBit };
+    HBRDG1 | BULLBIT, HBRDG3 | BULLBIT, HBRDG0 | BULLBIT,
+    RIVER, BRWH | BULLBIT, RIVER, HBRDG2 | BULLBIT };
   static int HBRTAB2[7] = {
-    River, River, BridgeHorizontal | BulldozableBit, BridgeHorizontal | BulldozableBit, BridgeHorizontal | BulldozableBit,
-    BridgeHorizontal | BulldozableBit, BridgeHorizontal | BulldozableBit };
+    RIVER, RIVER, HBRIDGE | BULLBIT, HBRIDGE | BULLBIT, HBRIDGE | BULLBIT,
+    HBRIDGE | BULLBIT, HBRIDGE | BULLBIT };
   static int VDx[7] = {  0,  1,  0,  0,  0,  0,  1 };
   static int VDy[7] = { -2, -2, -1,  0,  1,  2,  2 };
   static int VBRTAB[7] = {
-    VBRDG0 | BulldozableBit, VBRDG1 | BulldozableBit, River, BRWV | BulldozableBit,
-    River, VBRDG2 | BulldozableBit, VBRDG3 | BulldozableBit };
+    VBRDG0 | BULLBIT, VBRDG1 | BULLBIT, RIVER, BRWV | BULLBIT,
+    RIVER, VBRDG2 | BULLBIT, VBRDG3 | BULLBIT };
   static int VBRTAB2[7] = {
-    BridgeVertical | BulldozableBit, River, BridgeVertical | BulldozableBit, BridgeVertical | BulldozableBit,
-    BridgeVertical | BulldozableBit, BridgeVertical | BulldozableBit, River };
+    VBRIDGE | BULLBIT, RIVER, VBRIDGE | BULLBIT, VBRIDGE | BULLBIT,
+    VBRIDGE | BULLBIT, VBRIDGE | BULLBIT, RIVER };
   int z, x, y, MPtem;
 
   if (CurrentTileMasked == BRWV) { /*  Vertical bridge close */
-    if ((!(rand16() & 3)) &&
+    if ((!(Rand16() & 3)) &&
 	(GetBoatDis() > 340))
       for (z = 0; z < 7; z++) { /* Close  */
 	x = SimulationTarget.x + VDx[z];
 	y = SimulationTarget.y + VDy[z];
-	if (coordinatesValid({ x, y }))
-	  if ((tileValue(x, y) & LowerMask) == (VBRTAB[z] & LowerMask))
-	    tileValue(x, y) = VBRTAB2[z];
+	if (CoordinatesValid({ x, y }))
+	  if ((map[x][y] & LOMASK) == (VBRTAB[z] & LOMASK))
+	    map[x][y] = VBRTAB2[z];
       }
     return true;
   }
   if (CurrentTileMasked == BRWH) { /*  Horizontal bridge close  */
-    if ((!(rand16() & 3)) &&
+    if ((!(Rand16() & 3)) &&
 	(GetBoatDis() > 340))
       for (z = 0; z < 7; z++) { /* Close  */
 	x = SimulationTarget.x + HDx[z];
 	y = SimulationTarget.y + HDy[z];
-	if (coordinatesValid({ x, y }))
-	  if ((tileValue(x, y) & LowerMask) == (HBRTAB[z] & LowerMask))
-	    tileValue(x, y) = HBRTAB2[z];
+	if (CoordinatesValid({ x, y }))
+	  if ((map[x][y] & LOMASK) == (HBRTAB[z] & LOMASK))
+	    map[x][y] = HBRTAB2[z];
       }
     return true;
   }
 
-  if ((GetBoatDis() < 300) || (!(rand16() & 7))) {
+  if ((GetBoatDis() < 300) || (!(Rand16() & 7))) {
     if (CurrentTileMasked & 1) {
       if (SimulationTarget.x < (SimWidth - 1))
-	if (tileValue(SimulationTarget.x + 1, SimulationTarget.y) == RiverChannel) { /* Vertical open */
+	if (map[SimulationTarget.x + 1][SimulationTarget.y] == CHANNEL) { /* Vertical open */
 	  for (z = 0; z < 7; z++) {
 	    x = SimulationTarget.x + VDx[z];
 	    y = SimulationTarget.y + VDy[z];
-	    if (coordinatesValid({ x, y }))  {
-	      MPtem = tileValue(x, y);
-	      if ((MPtem == RiverChannel) ||
+	    if (CoordinatesValid({ x, y }))  {
+	      MPtem = map[x][y];
+	      if ((MPtem == CHANNEL) ||
 		  ((MPtem & 15) == (VBRTAB2[z] & 15)))
-		tileValue(x, y) = VBRTAB[z];
+		map[x][y] = VBRTAB[z];
 	    }
 	  }
 	  return true;
@@ -358,15 +305,15 @@ bool DoBridge()
       return false;
     } else {
       if (SimulationTarget.y > 0)
-	if (tileValue(SimulationTarget.x, SimulationTarget.y - 1) == RiverChannel) { /* Horizontal open  */
+	if (map[SimulationTarget.x][SimulationTarget.y - 1] == CHANNEL) { /* Horizontal open  */
 	  for (z = 0; z < 7; z++) {
 	    x = SimulationTarget.x + HDx[z];
 	    y = SimulationTarget.y + HDy[z];
-	    if (coordinatesValid({ x, y })) {
-	      MPtem = tileValue(x, y);
+	    if (CoordinatesValid({ x, y })) {
+	      MPtem = map[x][y];
 	      if (((MPtem & 15) == (HBRTAB2[z] & 15)) ||
-		  (MPtem == RiverChannel))
-		tileValue(x, y) = HBRTAB[z];
+		  (MPtem == CHANNEL))
+		map[x][y] = HBRTAB[z];
 	    }
 	  }
 	  return true;
@@ -382,28 +329,28 @@ void DoRoad()
 {
     static int DensityTable[3] =
     {
-        BridgeBase,   // No Traffic
-        TrafficLightBase,   // Light Traffic
-        TrafficHeavyBase    // Heavy Traffic
+        ROADBASE,   // No Traffic
+        LTRFBASE,   // Light Traffic
+        HTRFBASE    // Heavy Traffic
     };
 
-    RoadCount++;
+    RoadTotal++;
 
     if (RoadEffect < 30) // Deteriorating Roads
     {
-        if (!(rand16() & 511))
+        if (!(Rand16() & 511))
         {
-            if (!(CurrentTile & ConductiveBit))
+            if (!(CurrentTile & CONDBIT))
             {
-                if (RoadEffect < (rand16() & 31))
+                if (RoadEffect < (Rand16() & 31))
                 {
                     if (((CurrentTileMasked & 15) < 2) || ((CurrentTileMasked & 15) == 15))
                     {
-                        tileValue(SimulationTarget.x, SimulationTarget.y) = River;
+                        map[SimulationTarget.x][SimulationTarget.y] = RIVER;
                     }
                     else
                     {
-                        tileValue(SimulationTarget.x, SimulationTarget.y) = Rubble + (rand16() & 3) | BulldozableBit;
+                        map[SimulationTarget.x][SimulationTarget.y] = RUBBLE + (Rand16() & 3) + BULLBIT;
                     }
                     return;
                 }
@@ -411,9 +358,9 @@ void DoRoad()
         }
     }
 
-    if (!(CurrentTile & BurnableBit)) /* If Bridge */
+    if (!(CurrentTile & BURNBIT)) /* If Bridge */
     {
-        RoadCount += 4;
+        RoadTotal += 4;
         if (DoBridge())
         {
             return;
@@ -422,41 +369,44 @@ void DoRoad()
 
     int trafficDensity{};
 
-    if (CurrentTileMasked < TrafficLightBase)
+    if (CurrentTileMasked < LTRFBASE)
     {
         trafficDensity = 0;
     }
-    else if (CurrentTileMasked < TrafficHeavyBase)
+    else if (CurrentTileMasked < HTRFBASE)
     {
         trafficDensity = 1;
     }
     else
     {
-        RoadCount++;
+        RoadTotal++;
         trafficDensity = 2;
     }
 
-    // Set Traffic Density
-    int Density = std::clamp(TrafficDensityMap.value(SimulationTarget.skewInverseBy({ 2, 2 })) / 64, 0, 2);
-
-    // tden 0..2
-    if (trafficDensity != Density)
+    int Density = TrafficDensityMap.value(SimulationTarget.skewInverseBy({ 2, 2 })) / 64;  // Set Traf Density
+   
+    if (Density > 2)
     {
-        int z = ((CurrentTileMasked - BridgeBase) & 15) + DensityTable[Density];
+        Density = 2;
+    }
+
+    if (trafficDensity != Density) /* tden 0..2   */
+    {
+        int z = ((CurrentTileMasked - ROADBASE) & 15) + DensityTable[Density];
         
-        z += CurrentTile & (UpperMask - AnimatedBit);
+        z += CurrentTile & (ALLBITS - ANIMBIT);
         
         if (Density)
         {
-            z += AnimatedBit;
+            z += ANIMBIT;
         }
 
-        tileValue(SimulationTarget.x, SimulationTarget.y) = z;
+        map[SimulationTarget.x][SimulationTarget.y] = z;
     }
 }
 
 
-/* comefrom: updateSpecialZones spawnHospital */
+/* comefrom: DoSPZone spawnHospital */
 void RepairZone(int ZCent, int zsize)
 {
   int cnt;
@@ -469,20 +419,20 @@ void RepairZone(int ZCent, int zsize)
       int xx = SimulationTarget.x + x;
       int yy = SimulationTarget.y + y;
       cnt++;
-      if (coordinatesValid({ xx, yy })) {
-	ThCh = tileValue(xx, yy);
-	if (ThCh & ZonedBit) continue;
-	if (ThCh & AnimatedBit) continue;
-	ThCh = ThCh & LowerMask;
-	if ((ThCh < Rubble) || (ThCh >= BridgeBase)) {
-	  tileValue(xx, yy) = ZCent - 3 - zsize + cnt + ConductiveBit + BurnableBit;
+      if (CoordinatesValid({ xx, yy })) {
+	ThCh = map[xx][yy];
+	if (ThCh & ZONEBIT) continue;
+	if (ThCh & ANIMBIT) continue;
+	ThCh = ThCh & LOMASK;
+	if ((ThCh < RUBBLE) || (ThCh >= ROADBASE)) {
+	  map[xx][yy] = ZCent - 3 - zsize + cnt + CONDBIT + BURNBIT;
 	}
       }
     }
 }
 
 
-/* comefrom: updateSpecialZones */
+/* comefrom: DoSPZone */
 void DrawStadium(int z)
 {
     z = z - 5;
@@ -490,24 +440,24 @@ void DrawStadium(int z)
     {
         for (int x = (SimulationTarget.x - 1); x < (SimulationTarget.x + 3); x++)
         {
-            tileValue(x, y) = (z++) | BurnableConductiveBits;
+            map[x][y] = (z++) | BNCNBIT;
         }
     }
  
-    tileValue(SimulationTarget.x, SimulationTarget.y) |= ZonedBit | PowerBit;
+    map[SimulationTarget.x][SimulationTarget.y] |= ZONEBIT | PWRBIT;
 }
 
 
 void CoalSmoke(int mx, int my)
 {
-    static int SmTb[4] = { CoalPowerSmoke1, CoalPowerSmoke2, CoalPowerSmoke3, CoalPowerSmoke4 };
+    static int SmTb[4] = { COALSMOKE1, COALSMOKE2, COALSMOKE3, COALSMOKE4 };
     static int dx[4] = { 1,  2,  1,  2 };
     static int dy[4] = { -1, -1,  0,  0 };
     int x;
 
     for (x = 0; x < 4; x++)
     {
-        tileValue(mx + dx[x], my + dy[x]) = SmTb[x] | AnimatedBit | ConductiveBit | PowerBit | BurnableBit;
+        map[mx + dx[x]][my + dy[x]] = SmTb[x] | ANIMBIT | CONDBIT | PWRBIT | BURNBIT;
     }
 }
 
@@ -515,42 +465,42 @@ void CoalSmoke(int mx, int my)
 /*
  * fixme: Break this into smaller chunks
  */
-void updateSpecialZones(bool powered, const CityProperties& properties)
+void DoSPZone(bool powered, const CityProperties& properties)
 {
     static int MltdwnTab[3] = { 30000, 20000, 10000 };  /* simadj */
     int z;
 
     switch (CurrentTileMasked)
     {
-    case PowerPlant:
-        CoalPowerPlantCount++;
+    case POWERPLANT:
+        CoalPop++;
         if (!(CityTime & 7)) /* post */
         {
-            RepairZone(PowerPlant, 4);
+            RepairZone(POWERPLANT, 4);
         }
         pushPowerStack(SimulationTarget);
         CoalSmoke(SimulationTarget.x, SimulationTarget.y);
         return;
 
-    case NuclearPower:
-        if (gameplayOptions().disastersEnabled && !randomRange(0, MltdwnTab[properties.GameLevel()]))
+    case NUCLEAR:
+        if (gameOptions.mDisasters && !RandomRange(0, MltdwnTab[properties.GameLevel()]))
         {
             DoMeltdown(SimulationTarget.x, SimulationTarget.y);
             return;
         }
-        NuclearPowerPlantCount++;
+        NuclearPop++;
         if (!(CityTime & 7)) /* post */
         {
-            RepairZone(NuclearPower, 4);
+            RepairZone(NUCLEAR, 4);
         }
         pushPowerStack(SimulationTarget);
         return;
 
-    case FireStation:
-        FireStationCount++;
+    case FIRESTATION:
+        FireStPop++;
         if (!(CityTime & 7)) /* post */
         {
-            RepairZone(FireStation, 3);
+            RepairZone(FIRESTATION, 3);
         }
 
         if (powered) /* if powered get effect  */
@@ -573,11 +523,11 @@ void updateSpecialZones(bool powered, const CityProperties& properties)
         }
         return;
 
-    case PoliceStation:
-        PoliceStationCount++;
+    case POLICESTATION:
+        PolicePop++;
         if (!(CityTime & 7))
         {
-            RepairZone(PoliceStation, 3); /* post */
+            RepairZone(POLICESTATION, 3); /* post */
         }
 
         if (powered)
@@ -600,49 +550,49 @@ void updateSpecialZones(bool powered, const CityProperties& properties)
         }
         return;
 
-    case Stadium:
-        StadiumCount++;
+    case STADIUM:
+        StadiumPop++;
         if (!(CityTime & 15))
         {
-            RepairZone(Stadium, 4);
+            RepairZone(STADIUM, 4);
         }
         if (powered)
         {
             if (!((CityTime + SimulationTarget.x + SimulationTarget.y) & 31)) // post release
             {
-                DrawStadium(StatdiumFull);
-                tileValue(SimulationTarget.x + 1, SimulationTarget.y) = FootballGame1 + AnimatedBit;
-                tileValue(SimulationTarget.x + 1, SimulationTarget.y + 1) = FootballGame2 + AnimatedBit;
+                DrawStadium(FULLSTADIUM);
+                map[SimulationTarget.x + 1][SimulationTarget.y] = FOOTBALLGAME1 + ANIMBIT;
+                map[SimulationTarget.x + 1][SimulationTarget.y + 1] = FOOTBALLGAME2 + ANIMBIT;
             }
         }
         return;
 
-    case StatdiumFull:
-        StadiumCount++;
+    case FULLSTADIUM:
+        StadiumPop++;
         if (!((CityTime + SimulationTarget.x + SimulationTarget.y) & 7))	/* post release */
         {
-            DrawStadium(Stadium);
+            DrawStadium(STADIUM);
         }
         return;
 
-    case Airport:
-        AirportCount++;
+    case AIRPORT:
+        APortPop++;
         
         if (!(CityTime & 7))
         {
-            RepairZone(Airport, 6);
+            RepairZone(AIRPORT, 6);
         }
 
         if (powered) // post
         { 
-            if ((maskedTileValue(SimulationTarget.x + 1, SimulationTarget.y - 1)) == Radar)
+            if ((map[SimulationTarget.x + 1][SimulationTarget.y - 1] & LOMASK) == RADAR)
             {
-                tileValue(SimulationTarget.x + 1, SimulationTarget.y - 1) = Radar + AnimatedBit + ConductiveBit + BurnableBit;
+                map[SimulationTarget.x + 1][SimulationTarget.y - 1] = RADAR + ANIMBIT + CONDBIT + BURNBIT;
             }
         }
         else
         {
-            tileValue(SimulationTarget.x + 1, SimulationTarget.y - 1) = Radar + ConductiveBit + BurnableBit;
+            map[SimulationTarget.x + 1][SimulationTarget.y - 1] = RADAR + CONDBIT + BURNBIT;
         }
 
         if (powered)
@@ -651,11 +601,11 @@ void updateSpecialZones(bool powered, const CityProperties& properties)
         }
         return;
 
-    case Port:
-        SeaPortCount++;
+    case PORT:
+        PortPop++;
         if ((CityTime & 15) == 0)
         {
-            RepairZone(Port, 4);
+            RepairZone(PORT, 4);
         }
 
         SimSprite* shipSprite = getSprite(SimSprite::Type::Ship);
@@ -675,27 +625,30 @@ void MapScan(int x1, int x2, const CityProperties& properties)
     {
         for (int y = 0; y < SimHeight; y++)
         {
-            CurrentTile = tileValue(x, y);
+            CurrentTile = map[x][y];
             if (CurrentTile != 0)
             {
+                //CurrentTileMasked = CurrentTile & LOMASK;	// Mask off status bits
+
+                //const int tile = maskedTileValue(x, y);
                 CurrentTileMasked = maskedTileValue(CurrentTile);
 
-                if (CurrentTileMasked >= Flood)
+                if (CurrentTileMasked >= FLOOD)
                 {
                     SimulationTarget = { x, y };
 
-                    if (CurrentTileMasked < BridgeBase)
+                    if (CurrentTileMasked < ROADBASE)
                     {
-                        if (CurrentTileMasked >= FireBase)
+                        if (CurrentTileMasked >= FIREBASE)
                         {
-                            BurningTileCount++;
-                            if (!(rand16() & 3)) // 1 in 4 times
+                            FirePop++;
+                            if (!(Rand16() & 3)) // 1 in 4 times
                             {
                                 DoFire();
                             }
                             continue;
                         }
-                        if (CurrentTileMasked < RadiationTile)
+                        if (CurrentTileMasked < RADTILE)
                         {
                             DoFlood();
                         }
@@ -706,31 +659,31 @@ void MapScan(int x1, int x2, const CityProperties& properties)
                         continue;
                     }
 
-                    if (CurrentTile & ConductiveBit)
+                    if (CurrentTile & CONDBIT)
                     {
                         setZonePower({ x, y });
                     }
 
-                    if ((CurrentTileMasked >= BridgeBase) && (CurrentTileMasked < PowerBase))
+                    if ((CurrentTileMasked >= ROADBASE) && (CurrentTileMasked < POWERBASE))
                     {
                         DoRoad();
                         continue;
                     }
 
-                    if (CurrentTile & ZonedBit) // process Zones
+                    if (CurrentTile & ZONEBIT) // process Zones
                     {
                         updateZone({ x, y }, properties);
                         continue;
                     }
 
-                    if ((CurrentTileMasked >= RailBase) && (CurrentTileMasked < ResidentialBase))
+                    if ((CurrentTileMasked >= RAILBASE) && (CurrentTileMasked < ResidentialBase))
                     {
                         DoRail({ x, y });
                         continue;
                     }
-                    if ((CurrentTileMasked >= ExplosionTinySome) && (CurrentTileMasked <= ExplosionTinyLast)) // clear AniRubble
+                    if ((CurrentTileMasked >= SOMETINYEXP) && (CurrentTileMasked <= LASTTINYEXP)) // clear AniRubble
                     {
-                        tileValue(x, y) = Rubble + (rand16() & 3) + BulldozableBit;
+                        map[x][y] = RUBBLE + (Rand16() & 3) + BULLBIT;
                     }
                 }
             }
@@ -749,36 +702,36 @@ void SetValves(const CityProperties& properties, const Budget& budget)
     float Rratio, Cratio, Iratio, temp;
     float NormResPop, PjResPop, PjComPop, PjIndPop;
 
-    MiscHistory[1] = static_cast<int>(EMarket);
-    MiscHistory[2] = ResidentialPopulationCount;
-    MiscHistory[3] = CommercialPopulationCount;
-    MiscHistory[4] = IndustrialPopulationCount;
-    MiscHistory[5] = rci.residentialDemand();
-    MiscHistory[6] = rci.commercialDemand();
-    MiscHistory[7] = rci.industrialDemand();
-    MiscHistory[10] = CrimeRamp;
-    MiscHistory[11] = PolluteRamp;
-    MiscHistory[12] = LVAverage;
-    MiscHistory[13] = CrimeAverage;
-    MiscHistory[14] = PolluteAverage;
-    MiscHistory[15] = properties.GameLevel();
-    MiscHistory[16] = static_cast<int>(cityClass());
-    MiscHistory[17] = cityScore();
+    MiscHis[1] = static_cast<int>(EMarket);
+    MiscHis[2] = ResPop;
+    MiscHis[3] = ComPop;
+    MiscHis[4] = IndPop;
+    MiscHis[5] = RValve;
+    MiscHis[6] = CValve;
+    MiscHis[7] = IValve;
+    MiscHis[10] = CrimeRamp;
+    MiscHis[11] = PolluteRamp;
+    MiscHis[12] = LVAverage;
+    MiscHis[13] = CrimeAverage;
+    MiscHis[14] = PolluteAverage;
+    MiscHis[15] = properties.GameLevel();
+    MiscHis[16] = static_cast<int>(cityClass());
+    MiscHis[17] = cityScore();
 
-    NormResPop = static_cast<float>(ResidentialPopulationCount / 8);
-    PreviousPopulationTotal = PopulationTotal;
-    PopulationTotal = static_cast<int>(NormResPop) + CommercialPopulationCount + IndustrialPopulationCount;
+    NormResPop = static_cast<float>(ResPop / 8);
+    LastTotalPop = TotalPop;
+    TotalPop = static_cast<int>(NormResPop) + ComPop + IndPop;
 
-    if (NormResPop) Employment = ((CommercialPopulationHistory[1] + IndustrialPopulationHistory[1]) / NormResPop);
+    if (NormResPop) Employment = ((ComHis[1] + IndHis[1]) / NormResPop);
     else Employment = 1;
 
     Migration = NormResPop * (Employment - 1);
     Births = NormResPop * 0.02f; 			/* Birth Rate  */
     PjResPop = NormResPop + Migration + Births;	/* Projected Res.Pop  */
 
-    if (float result = static_cast<float>(CommercialPopulationHistory[1] + IndustrialPopulationHistory[1]))
+    if (float result = static_cast<float>(ComHis[1] + IndHis[1]))
     {
-        LaborBase = (ResidentialPopulationHistory[1] / result);
+        LaborBase = (ResHis[1] / result);
     }
     else
     {
@@ -794,13 +747,13 @@ void SetValves(const CityProperties& properties, const Budget& budget)
         LaborBase = 0.0f;  /* LB > 1 - .1  */
     }
 
-    // Point of this? It adds this all up then just ignores the result?
+    // MPoint of this? It adds this all up then just ignores the result?
     for (int z = 0; z < 2; z++)
     {
-        temp = static_cast<float>(ResidentialPopulationHistory[z] + CommercialPopulationHistory[z] + IndustrialPopulationHistory[z]);
+        temp = static_cast<float>(ResHis[z] + ComHis[z] + IndHis[z]);
     }
 
-    IntMarket = (NormResPop + CommercialPopulationCount + IndustrialPopulationCount) / 3.7f;
+    IntMarket = (NormResPop + ComPop + IndPop) / 3.7f;
 
     PjComPop = IntMarket * LaborBase;
 
@@ -820,7 +773,7 @@ void SetValves(const CityProperties& properties, const Budget& budget)
         break;
     }
 
-    PjIndPop = IndustrialPopulationCount * LaborBase * temp;
+    PjIndPop = IndPop * LaborBase * temp;
     if (PjIndPop < 5)
     {
         PjIndPop = 5;
@@ -834,17 +787,17 @@ void SetValves(const CityProperties& properties, const Budget& budget)
     {
         Rratio = 1.3f;
     }
-    if (CommercialPopulationCount)
+    if (ComPop)
     {
-        Cratio = (PjComPop / CommercialPopulationCount);
+        Cratio = (PjComPop / ComPop);
     }
     else
     {
         Cratio = PjComPop;
     }
-    if (IndustrialPopulationCount)
+    if (IndPop)
     {
-        Iratio = (PjIndPop / IndustrialPopulationCount);
+        Iratio = (PjIndPop / IndPop);
     }
     else
     {
@@ -861,21 +814,64 @@ void SetValves(const CityProperties& properties, const Budget& budget)
     Cratio = ((Cratio - 1) * 600) + TaxTable[index];
     Iratio = ((Iratio - 1) * 600) + TaxTable[index];
 
-	rci.adjustResidentialDemand(static_cast<int>(Rratio));
-	rci.adjustCommercialDemand(static_cast<int>(Cratio));
-	rci.adjustIndustrialDemand(static_cast<int>(Iratio));
+    if (Rratio > 0)		/* ratios are velocity changes to valves  */
+    {
+        if (RValve < 2000)
+        {
+            RValve += static_cast<int>(Rratio);
+        }
+    }
+    if (Rratio < 0)
+    {
+        if (RValve > -2000)
+        {
+            RValve += static_cast<int>(Rratio);
+        }
+    }
+    if (Cratio > 0)
+    {
+        if (CValve < 1500)
+        {
+            CValve += static_cast<int>(Cratio);
+        }
+    }
+    if (Cratio < 0)
+    {
+        if (CValve > -1500)
+        {
+            CValve += static_cast<int>(Cratio);
+        }
+    }
+    if (Iratio > 0)
+    {
+        if (IValve < 1500)
+        {
+            IValve += static_cast<int>(Iratio);
+        }
+    }
+    if (Iratio < 0)
+    {
+        if (IValve > -1500)
+        {
+            IValve += static_cast<int>(Iratio);
+        }
+    }
 
-    if ((ResCap) && (rci.residentialDemand() > 0)) // Stad, Prt, Airprt
+    RValve = std::clamp(RValve, -1500, 1500);
+    CValve = std::clamp(CValve, -1500, 1500);
+    IValve = std::clamp(IValve, -1500, 1500);
+
+    if ((ResCap) && (RValve > 0)) // Stad, Prt, Airprt
     {
-        rci.residentialDemand(0);
+        RValve = 0;
     }
-    if ((ComCap) && (rci.commercialDemand() > 0))
+    if ((ComCap) && (CValve > 0))
     {
-        rci.commercialDemand(0);
+        CValve = 0;
     }
-    if ((IndCap) && (rci.industrialDemand() > 0))
+    if ((IndCap) && (IValve > 0))
     {
-        rci.industrialDemand(0);
+        IValve = 0;
     }
 }
 
@@ -884,24 +880,24 @@ void ClearCensus()
 {
     PoweredZoneCount = 0;
     UnpoweredZoneCount = 0;
-    BurningTileCount = 0;
-    RoadCount = 0;
-    RailCount = 0;
-    ResidentialPopulationCount = 0;
-    CommercialPopulationCount = 0;
-    IndustrialPopulationCount = 0;
-    ResidentialZoneCount = 0;
-    CommercialZoneCount = 0;
-    IndustrialZoneCount = 0;
-    HospitalCount = 0;
-    ChurchCount = 0;
-    PoliceStationCount = 0;
-    FireStationCount = 0;
-    StadiumCount = 0;
-    CoalPowerPlantCount = 0;
-    NuclearPowerPlantCount = 0;
-    SeaPortCount = 0;
-    AirportCount = 0;
+    FirePop = 0;
+    RoadTotal = 0;
+    RailTotal = 0;
+    ResPop = 0;
+    ComPop = 0;
+    IndPop = 0;
+    ResZPop = 0;
+    ComZPop = 0;
+    IndZPop = 0;
+    HospPop = 0;
+    ChurchPop = 0;
+    PolicePop = 0;
+    FireStPop = 0;
+    StadiumPop = 0;
+    CoalPop = 0;
+    NuclearPop = 0;
+    PortPop = 0;
+    APortPop = 0;
     resetPowerStack(); // Reset before Mapscan
 
     FireStationMap.reset();
@@ -912,55 +908,55 @@ void ClearCensus()
 void TakeCensus(Budget& budget)
 {
     /* put census#s in Historical Graphs and scroll data  */
-    std::rotate(ResidentialPopulationHistory.rbegin(), ResidentialPopulationHistory.rbegin() + 1, ResidentialPopulationHistory.rend());
-    std::rotate(CommercialPopulationHistory.rbegin(), CommercialPopulationHistory.rbegin() + 1, CommercialPopulationHistory.rend());
-    std::rotate(IndustrialPopulationHistory.rbegin(), IndustrialPopulationHistory.rbegin() + 1, IndustrialPopulationHistory.rend());
-    std::rotate(CrimeHistory.rbegin(), CrimeHistory.rbegin() + 1, CrimeHistory.rend());
-    std::rotate(PollutionHistory.rbegin(), PollutionHistory.rbegin() + 1, PollutionHistory.rend());
+    std::rotate(ResHis.rbegin(), ResHis.rbegin() + 1, ResHis.rend());
+    std::rotate(ComHis.rbegin(), ComHis.rbegin() + 1, ComHis.rend());
+    std::rotate(IndHis.rbegin(), IndHis.rbegin() + 1, IndHis.rend());
+    std::rotate(CrimeHis.rbegin(), CrimeHis.rbegin() + 1, CrimeHis.rend());
+    std::rotate(PollutionHis.rbegin(), PollutionHis.rbegin() + 1, PollutionHis.rend());
     std::rotate(MoneyHis.rbegin(), MoneyHis.rbegin() + 1, MoneyHis.rend());
 
-    ResidentialPopulationHistoryHighest = *std::max_element(ResidentialPopulationHistory.begin(), ResidentialPopulationHistory.end());
-    CommercialPopulationHistoryHighest = *std::max_element(CommercialPopulationHistory.begin(), CommercialPopulationHistory.end());
-    IndustrialPopulationHistoryHighest = *std::max_element(IndustrialPopulationHistory.begin(), IndustrialPopulationHistory.end());
+    ResHisMax = *std::max_element(ResHis.begin(), ResHis.end());
+    ComHisMax = *std::max_element(ComHis.begin(), ComHis.end());
+    IndHisMax = *std::max_element(IndHis.begin(), IndHis.end());
 
-    ResidentialPopulationHistory[0] = ResidentialPopulationCount / 8; // magic number
-    CommercialPopulationHistory[0] = CommercialPopulationCount;
-    IndustrialPopulationHistory[0] = IndustrialPopulationCount;
+    ResHis[0] = ResPop / 8; // magic number
+    ComHis[0] = ComPop;
+    IndHis[0] = IndPop;
 
     CrimeRamp += (CrimeAverage - CrimeRamp) / 4; // magic number
-    CrimeHistory[0] = CrimeRamp;
+    CrimeHis[0] = CrimeRamp;
 
     PolluteRamp += (PolluteAverage - PolluteRamp) / 4; // magic number
-    PollutionHistory[0] = PolluteRamp;
+    PollutionHis[0] = PolluteRamp;
 
     MoneyHis[0] = std::clamp((budget.CashFlow() / 20) + 128, 0, 255); // scale to 0..255
-    CrimeHistory[0] = std::clamp(CrimeHistory[0], 0, 255);
-    PollutionHistory[0] = std::clamp(PollutionHistory[0], 0, 255);
+    CrimeHis[0] = std::clamp((int)CrimeHis[0], 0, 255);
+    PollutionHis[0] = std::clamp((int)PollutionHis[0], 0, 255);
 
-    if (HospitalCount < (ResidentialPopulationCount / 256))
+    if (HospPop < (ResPop / 256))
     {
-        HospitalBuildCount = 1;
+        NeedHosp = 1;
     }
-    if (HospitalCount > (ResidentialPopulationCount / 256))
+    if (HospPop > (ResPop / 256))
     {
-        HospitalBuildCount = -1;
+        NeedHosp = -1;
     }
-    if (HospitalCount == (ResidentialPopulationCount / 256))
+    if (HospPop == (ResPop / 256))
     {
-        HospitalBuildCount = 0;
+        NeedHosp = 0;
     }
 
-    if (ChurchCount < (ResidentialPopulationCount / 256))
+    if (ChurchPop < (ResPop / 256))
     {
-        ChurchBuildCount = 1;
+        NeedChurch = 1;
     }
-    if (ChurchCount > (ResidentialPopulationCount / 256))
+    if (ChurchPop > (ResPop / 256))
     {
-        ChurchBuildCount = -1;
+        NeedChurch = -1;
     }
-    if (ChurchCount == (ResidentialPopulationCount / 256))
+    if (ChurchPop == (ResPop / 256))
     {
-        ChurchBuildCount = 0;
+        NeedChurch = 0;
     }
 }
 
@@ -975,12 +971,12 @@ void Take2Census()
     std::rotate(PollutionHis120Years.rbegin(), PollutionHis120Years.rbegin() + 1, PollutionHis120Years.rend());
     std::rotate(MoneyHis120Years.rbegin(), MoneyHis120Years.rbegin() + 1, MoneyHis120Years.rend());
 
-    ResHis120Years[0] = ResidentialPopulationCount / 8; // magic number
-    ComHis120Years[0] = CommercialPopulationCount;
-    IndHis120Years[0] = IndustrialPopulationCount;
+    ResHis120Years[0] = ResPop / 8; // magic number
+    ComHis120Years[0] = ComPop;
+    IndHis120Years[0] = IndPop;
 
-    CrimeHis120Years[0] = CrimeHistory[0];
-    PollutionHis120Years[0] = PollutionHistory[0];
+    CrimeHis120Years[0] = CrimeHis[0];
+    PollutionHis120Years[0] = PollutionHis[0];
     MoneyHis120Years[0] = MoneyHis[0];
 }
 
@@ -994,13 +990,13 @@ void CollectTax(const CityProperties& properties, Budget& budget)
     //int z = AvCityTax / 48;  // post
     AvCityTax = 0;
     
-    budget.PoliceFundsNeeded(PoliceStationCount * 100);
-    budget.FireFundsNeeded(FireStationCount * 100);
-    budget.RoadFundsNeeded(static_cast<int>((RoadCount + (RailCount * 2)) * RLevels[properties.GameLevel()]));
+    budget.PoliceFundsNeeded(PolicePop * 100);
+    budget.FireFundsNeeded(FireStPop * 100);
+    budget.RoadFundsNeeded(static_cast<int>((RoadTotal + (RailTotal * 2)) * RLevels[properties.GameLevel()]));
 
-    budget.TaxIncome(static_cast<int>(((static_cast<float>(PopulationTotal) * LVAverage) / 120.0f) * budget.TaxRate() * FLevels[properties.GameLevel()])); //yuck
+    budget.TaxIncome(static_cast<int>(((static_cast<float>(TotalPop) * LVAverage) / 120.0f) * budget.TaxRate() * FLevels[properties.GameLevel()])); //yuck
 
-    if (PopulationTotal) // if there are people to tax
+    if (TotalPop) // if there are people to tax
     {
         budget.update();
     }
@@ -1053,7 +1049,7 @@ void DecROGMem()
 /* comefrom: InitSimMemory SimLoadInit */
 void SetCommonInits()
 {
-    EvalInit();
+    evalInit();
     RoadEffect = 32;
     PoliceEffect = 1000;
     FireEffect = 1000;
@@ -1064,19 +1060,19 @@ void InitSimMemory()
 {
     SetCommonInits();
 
-    ResidentialPopulationHistory.fill(0);
-    CommercialPopulationHistory.fill(0);
-    IndustrialPopulationHistory.fill(0);
+    ResHis.fill(0);
+    ComHis.fill(0);
+    IndHis.fill(0);
     MoneyHis.fill(128); // magic number
-    CrimeHistory.fill(0);
-    PollutionHistory.fill(0);
+    CrimeHis.fill(0);
+    PollutionHis.fill(0);
 
     CrimeRamp = 0;
     PolluteRamp = 0;
-    PopulationTotal = 0;
-	rci.residentialDemand(0);
-	rci.commercialDemand(0);
-	rci.industrialDemand(0);
+    TotalPop = 0;
+    RValve = 0;
+    CValve = 0;
+    IValve = 0;
     ResCap = 0;
     ComCap = 0;
     IndCap = 0;
@@ -1098,8 +1094,8 @@ void DoNilPower()
     {
         for (int y = 0; y < SimHeight; y++)
         {
-            int z = tileValue(x, y);
-            if (z & ZonedBit)
+            int z = map[x][y];
+            if (z & ZONEBIT)
             {
                 SimulationTarget = { x, y };
                 setZonePower({ x, y });
@@ -1144,19 +1140,19 @@ void SimLoadInit(CityProperties& properties)
     static int ScoreWaitTab[9] = { 0, 30 * 48, 5 * 48, 5 * 48, 10 * 48,
                      5 * 48, 10 * 48, 5 * 48, 10 * 48 };
 
-    EMarket = (float)MiscHistory[1];
-    ResidentialPopulationCount = MiscHistory[2];
-    CommercialPopulationCount = MiscHistory[3];
-    IndustrialPopulationCount = MiscHistory[4];
-    rci.residentialDemand(MiscHistory[5]);
-    rci.commercialDemand(MiscHistory[6]);
-    rci.industrialDemand(MiscHistory[7]);
-    CrimeRamp = MiscHistory[10];
-    PolluteRamp = MiscHistory[11];
-    LVAverage = MiscHistory[12];
-    CrimeAverage = MiscHistory[13];
-    PolluteAverage = MiscHistory[14];
-    properties.GameLevel(MiscHistory[15]);
+    EMarket = (float)MiscHis[1];
+    ResPop = MiscHis[2];
+    ComPop = MiscHis[3];
+    IndPop = MiscHis[4];
+    RValve = MiscHis[5];
+    CValve = MiscHis[6];
+    IValve = MiscHis[7];
+    CrimeRamp = MiscHis[10];
+    PolluteRamp = MiscHis[11];
+    LVAverage = MiscHis[12];
+    CrimeAverage = MiscHis[13];
+    PolluteAverage = MiscHis[14];
+    properties.GameLevel(MiscHis[15]);
 
     if (CityTime < 0)
     {
@@ -1170,8 +1166,8 @@ void SimLoadInit(CityProperties& properties)
 
     SetCommonInits();
 
-    cityClass(static_cast<CityClass>(MiscHistory[16]));
-    cityScore(MiscHistory[17]);
+    cityClass(static_cast<CityClass>(MiscHis[16]));
+    cityScore(MiscHis[17]);
 
     if ((cityClass() > CityClass::Megalopolis) || (cityClass() < CityClass::Village))
     {
@@ -1229,23 +1225,23 @@ namespace
 
 void Simulate(int mod16, CityProperties& properties, Budget& budget)
 {
-    int speed = static_cast<int>(simSpeed()); // ew, find a better way to do this
+    int speed = static_cast<int>(SimSpeed()); // ew, find a better way to do this
 
     switch (mod16)
     {
     case 0:
-        SimCycleCounter.advance();
+        ++Scycle > 1023 ? Scycle = 0 : Scycle;
         
         if (DoInitialEval)
         {
-            DoInitialEval = false;
-            CityEvaluation(budget);
+            DoInitialEval = 0;
+            cityEvaluation(budget);
         }
         
         CityTime++;
         AvCityTax += budget.TaxRate(); // post <-- ?
         
-        if (!(SimCycleCounter.current() % 2))
+        if (!(Scycle % 2))
         {
             SetValves(properties, budget);
         }
@@ -1290,7 +1286,7 @@ void Simulate(int mod16, CityProperties& properties, Budget& budget)
         {
             TakeCensus(budget);
         }
-        if (!(CityTime % (CensusRate * Constants::MonthCount)))
+        if (!(CityTime % (CensusRate * 12)))
         {
             Take2Census();
         }
@@ -1298,12 +1294,12 @@ void Simulate(int mod16, CityProperties& properties, Budget& budget)
         if (!(CityTime % TaxFrequency))
         {
             CollectTax(properties, budget);
-            CityEvaluation(budget);
+            cityEvaluation(budget);
         }
         break;
 
     case 10:
-        if (!(SimCycleCounter.current() % 5))
+        if (!(Scycle % 5))
         {
             DecROGMem();
         }
@@ -1312,65 +1308,64 @@ void Simulate(int mod16, CityProperties& properties, Budget& budget)
         break;
 
     case 11:
-        if (!(SimCycleCounter.current() % PowerScanFrequency[speed]))
+        if (!(Scycle % PowerScanFrequency[speed]))
         {
             powerScan();
         }
         break;
 
     case 12:
-        if (!(SimCycleCounter.current() % PollutionScanFrequency[speed]))
+        if (!(Scycle % PollutionScanFrequency[speed]))
         {
             pollutionAndLandValueScan();
         }
         break;
 
     case 13:
-        if (!(SimCycleCounter.current() % CrimeScanFrequency[speed]))
+        if (!(Scycle % CrimeScanFrequency[speed]))
         {
             crimeScan();
         }
         break;
 
     case 14:
-        if (!(SimCycleCounter.current() % PopulationDensityScanFrequency[speed]))
+        if (!(Scycle % PopulationDensityScanFrequency[speed]))
         {
             scanPopulationDensity();
         }
         break;
 
     case 15:
-        if (!(SimCycleCounter.current() % FireAnalysisFrequency[speed]))
+        if (!(Scycle % FireAnalysisFrequency[speed]))
         {
             fireAnalysis();
         }
-        DoDisasters(properties);
+        if (gameOptions.mDisasters) { DoDisasters(properties);}
         break;
     }
 }
 
 
-const RCI& currentRCI()
-{
-    return rci;
-}
-
-
 void SimFrame(CityProperties& properties, Budget& budget)
 {
-    if (simSpeed() == SimulationSpeed::Paused)
+    if (SimSpeed() == SimulationSpeed::Paused)
     {
         return;
     }
 
-    Simulate(SimPhaseCounter.advance() % 16, properties, budget);
+    if (++Fcycle > 1024)
+    {
+        Fcycle = 0;
+    }
+
+    Simulate(Fcycle % 16, properties, budget);
 }
 
 
 void DoSimInit(CityProperties& properties, Budget& budget)
 {
-    SimPhaseCounter.reset();
-    SimCycleCounter.reset();
+    Fcycle = 0;
+    Scycle = 0;
 
     if (InitSimLoad == 2) 			/* if new city    */
     {
@@ -1391,8 +1386,8 @@ void DoSimInit(CityProperties& properties, Budget& budget)
     scanPopulationDensity();
     fireAnalysis();
     newMap(true);
-    PopulationTotal = 1;
-    DoInitialEval = true;
+    TotalPop = 1;
+    DoInitialEval = 1;
 }
 
 
@@ -1427,21 +1422,22 @@ void UpdateFundEffects(const Budget& budget)
 }
 
 
-void condemnZone(int Xloc, int Yloc, int ch)
+void FireZone(int Xloc, int Yloc, int ch)
 {
     int Xtem, Ytem;
     int XYmax;
 
-    RateOfGrowthMap.value({ Xloc / 8, Yloc / 8 }) -= 20;
+    const auto rogVal = RateOfGrowthMap.value({ Xloc / 8, Yloc / 8 });
+    RateOfGrowthMap.value({ Xloc / 8, Yloc / 8 }) = rogVal - 20;
 
-    ch = ch & LowerMask;
-    if (ch < PortBase)
+    ch = ch & LOMASK;
+    if (ch < PORTBASE)
     {
         XYmax = 2;
     }
     else
     {
-        if (ch == Airport)
+        if (ch == AIRPORT)
         {
             XYmax = 5;
         }
@@ -1457,19 +1453,14 @@ void condemnZone(int Xloc, int Yloc, int ch)
         {
             Xtem = Xloc + x;
             Ytem = Yloc + y;
-
-            /*  Is this check actually necessary ? It was in the original code
-                but since this inspects tiles that are zoned and zones can only
-				be placed on valid tiles, my guess is this should never be false.
-             */
-			if (!coordinatesValid({ Xtem, Ytem }))
+            if ((Xtem < 0) || (Xtem > (SimWidth - 1)) || (Ytem < 0) || (Ytem > (SimHeight - 1)))
             {
                 continue;
             }
 
-            if (static_cast<int>(maskedTileValue(Xtem, Ytem)) >= BridgeBase) // post release
+            if ((int)(map[Xtem][Ytem] & LOMASK) >= ROADBASE) // post release
             {
-                tileValue(Xtem, Ytem) |= BulldozableBit;
+                map[Xtem][Ytem] |= BULLBIT;
             }
         }
     }

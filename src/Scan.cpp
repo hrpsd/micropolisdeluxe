@@ -1,23 +1,25 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "Scan.h"
 
 #include "EffectMap.h"
 #include "Map.h"
-#include "s_alloc.h"
-#include "s_sim.h"
-#include "Util.h"
+#include "Vector.h"
 #include "Zone.h"
 
-#include "Math/Vector.h"
+#include "s_alloc.h"
+#include "s_sim.h"
+
+#include "w_util.h"
 
 #include <algorithm>
 #include <array>
@@ -27,10 +29,10 @@ namespace
 {
     bool NewMap{ false };
 
-    Point<int> PollutionMax;
-    Point<int> CrimeMax;
+    MPoint<int> PollutionMax;
+    MPoint<int> CrimeMax;
 
-    Point<int> CityCenter;
+    MPoint<int> CityCenter;
 
     EffectMap tem({ HalfWorldWidth, HalfWorldHeight });
     EffectMap tem2({ HalfWorldWidth, HalfWorldHeight });
@@ -41,27 +43,27 @@ namespace
 
     int getPollutionValue(int tileValue)
     {
-        if (tileValue < PowerBase)
+        if (tileValue < POWERBASE)
         {
-            if (tileValue >= TrafficHeavyBase) /* heavy traf  */
+            if (tileValue >= HTRFBASE) /* heavy traf  */
             {
                 return (/* 25 */ 75);
             }
 
-            if (tileValue >= TrafficLightBase) /* light traf  */
+            if (tileValue >= LTRFBASE) /* light traf  */
             {
                 return (/* 10 */ 50);
             }
 
-            if (tileValue < BridgeBase)
+            if (tileValue < ROADBASE)
             {
-                if (tileValue > FireBase)
+                if (tileValue > FIREBASE)
                 {
                     return (/* 60 */ 90);
                 }
 
                 /* XXX: Why negative pollution from radiation? */
-                if (tileValue >= RadiationTile) /* radioactivity  */
+                if (tileValue >= RADTILE) /* radioactivity  */
                 {
                     return (/* -40 */ 255);
                 }
@@ -69,17 +71,17 @@ namespace
             return 0;
         }
 
-        if (tileValue <= IndutryLast)
+        if (tileValue <= LASTIND)
         {
             return (0);
         }
 
-        if (tileValue < PortBase) /* Ind  */
+        if (tileValue < PORTBASE) /* Ind  */
         {
             return (50);
         }
 
-        if (tileValue <= PowerPlantLast) /* prt, aprt, cpp */
+        if (tileValue <= LASTPOWERPLANT) /* prt, aprt, cpp */
         {
             return (/* 60 */ 100);
         }
@@ -121,17 +123,17 @@ namespace
     }
 
 
-    int pollutionLevel(const Point<int>& point)
+    int pollutionLevel(const MPoint<int>& point)
     {
         int pollutionLevel{};
         for (int xx = (point.x * 2); xx <= (point.x * 2) + 1; ++xx)
         {
             for (int yy = (point.y * 2); yy <= (point.y * 2) + 1; ++yy)
             {
-                const int tile = (maskedTileValue(xx, yy));
+                const int tile = (map[xx][yy] & LOMASK);
                 if (tile)
                 {
-                    if (tile < Rubble)
+                    if (tile < RUBBLE)
                     {
                         /* inc terrainMem */
                         //Qtem.value({ point.x / 2, point.y / 2 }) += 15;
@@ -167,7 +169,7 @@ namespace
                     pollutionTotal += pollutionValue;
 
                     /* find max pol for monster  */
-                    if ((pollutionValue > highestPollution) || ((pollutionValue == highestPollution) && (!(rand16() & 3))))
+                    if ((pollutionValue > highestPollution) || ((pollutionValue == highestPollution) && (!(Rand16() & 3))))
                     {
                         highestPollution = pollutionValue;
                         PollutionMax = { x * 2, y * 2 };
@@ -184,7 +186,7 @@ namespace
     {
         for (int i{}; i < HalfWorldWidth * HalfWorldHeight; ++i)
         {
-            const Point<int> coord{ i % HalfWorldWidth, i / HalfWorldWidth };
+            const MPoint<int> coord{ i % HalfWorldWidth, i / HalfWorldWidth };
             tem.value(coord) = pollutionLevel(coord);
         }
     }
@@ -197,9 +199,9 @@ namespace
         for (int x{}; x < SimWidth * SimHeight; ++x)
         {
 
-            const Point<int> coord{ x % SimWidth, x / SimWidth };
+            const MPoint<int> coord{ x % SimWidth, x / SimWidth };
             const auto tile = maskedTileValue(coord.x, coord.y);
-            if (tile < BridgeBase)
+            if (tile < ROADBASE)
             {
                 LandValueMap.value(coord.skewInverseBy({ 2, 2 })) = 0;
                 continue;
@@ -226,7 +228,7 @@ namespace
     }
 
 
-    int sumAdjacent(const Point<int>& location, const EffectMap& map)
+    int sumAdjacent(const MPoint<int>& location, const EffectMap& map)
     {
         int val{};
 
@@ -255,7 +257,7 @@ namespace
 };
 
 
-const Point<int>& cityCenterOfMass()
+const MPoint<int>& cityCenterOfMass()
 {
     return CityCenter;
 }
@@ -273,7 +275,7 @@ void newMap(bool value)
 }
 
 
-const Point<int>& pollutionMax()
+const MPoint<int>& pollutionMax()
 {
     return PollutionMax;
 }
@@ -369,17 +371,17 @@ int getPopulationDensity(int tile)
         return housePopulation();
     }
 
-    if (tile < CommercialBase)
+    if (tile < COMBASE)
     {
         return residentialZonePopulation(tile);
     }
 
-    if (tile < IndustryBase)
+    if (tile < INDBASE)
     {
         return commercialZonePopulation(tile) * 8;
     }
 
-    if (tile < PortBase)
+    if (tile < PORTBASE)
     {
         return industrialZonePopulation(tile) * 8;
     }
@@ -418,9 +420,9 @@ void scanPopulationDensity()
         for (int y{}; y < SimHeight; ++y)
         {
             int tile = tileValue({ x, y });
-            if (tile & ZonedBit)
+            if (tile & ZONEBIT)
             {
-                tile = tile & LowerMask;
+                tile = tile & LOMASK;
                 tile = std::clamp(getPopulationDensity(tile) * 8, 0, 254);
                 tem.value({ x / 2, y / 2 }) = tile;
                 axisTotal += { x, y };
@@ -490,7 +492,7 @@ void crimeScan()
             CrimeMap.value({ x, y }) = landValue;
             totz += landValue;
 
-            if ((landValue > cmax) || ((landValue == cmax) && (!(rand16() & 3))))
+            if ((landValue > cmax) || ((landValue == cmax) && (!(Rand16() & 3))))
             {
                 cmax = landValue;
                 CrimeMax = { x * 2, y * 2 };

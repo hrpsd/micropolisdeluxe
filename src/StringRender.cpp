@@ -1,11 +1,12 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 
@@ -19,7 +20,7 @@ StringRender::StringRender(SDL_Renderer* renderer) :
 {}
 
 
-void StringRender::drawString(Font& font, std::string_view text, const Point<int>& position) const
+void StringRender::drawString(Font& font, std::string_view text, const MPoint<int>& position) const
 {
     if (text.empty()) { return; }
 
@@ -34,23 +35,23 @@ void StringRender::drawString(Font& font, std::string_view text, const Point<int
         const auto glyphCellSize = font.glyphCellSize().to<float>();
         const auto adjustX = (gm.minX < 0) ? gm.minX : 0;
 
-        const SDL_FRect srcRect
+        const SDL_Rect srcRect
         {
-            static_cast<float>(gm.uvRect.position.x),
-            static_cast<float>(gm.uvRect.position.y),
-            static_cast<float>(glyphCellSize.x),
-            static_cast<float>(glyphCellSize.y)
+            static_cast<int>(gm.uvRect.x),
+            static_cast<int>(gm.uvRect.y),
+            static_cast<int>(glyphCellSize.x),
+            static_cast<int>(glyphCellSize.y)
         };
 
-        const SDL_FRect dstRect
+        const SDL_Rect dstRect
         {
-            static_cast<float>(position.x + offset + adjustX),
-            static_cast<float>(position.y),
-            static_cast<float>(glyphCellSize.x),
-            static_cast<float>(glyphCellSize.y)
+            position.x + offset + adjustX,
+            position.y,
+            static_cast<int>(glyphCellSize.x),
+            static_cast<int>(glyphCellSize.y)
         };
 
-        SDL_RenderTexture(mRenderer, font.texture(), &srcRect, &dstRect);
+        SDL_RenderCopy(mRenderer, font.texture(), &srcRect, &dstRect);
 
         offset += gm.advance;
     }

@@ -1,47 +1,46 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "Texture.h"
 
-#include "Graphics.h"
+#include "main.h"
 
-#if defined(__APPLE__)
-#include <SDL3_Image/SDL_image.h>
-#else
-#include <SDL3_Image/SDL_image.h>
-#endif
+#include SDL_INCLUDE_IMAGE
 
 #include <iostream>
-#include <sstream>
 
-Texture loadTexture(SDL_Renderer* renderer, std::string_view filename)
+Texture loadTexture(SDL_Renderer* renderer, const std::string& filename)
 {
-    SDL_Surface* temp = IMG_Load(filename.data());
+	std::cout << "Loading " << filename << std::endl;
+	
+    SDL_Surface* temp = IMG_Load((resourcesPath + "/" + filename).c_str());
     if (!temp)
     {
-		std::stringstream msg = std::stringstream{} << "loadTexture(): Unable to load '" << filename << "': " << SDL_GetError();
-        std::cout << msg.str() << std::endl;
-        throw std::runtime_error(msg.str());
+        std::cout << "loadTexture(): Unable to load '" + filename + "': " + SDL_GetError() << std::endl;
+        throw std::runtime_error("loadTexture(): Unable to load '" + filename + "': " + SDL_GetError());
     }
 
     SDL_Texture* out = SDL_CreateTextureFromSurface(renderer, temp);
-    SDL_DestroySurface(temp);
+    SDL_FreeSurface(temp);
 
     if (!out)
     {
-		std::stringstream msg = std::stringstream{} << "loadTexture(): Unable to load '" << filename << "': " << SDL_GetError();
-        std::cout << msg.str() << std::endl;
-        throw std::runtime_error(msg.str());
+        std::cout << "loadTexture(): Unable to load '" + filename + "': " + SDL_GetError() << std::endl;
+        throw std::runtime_error("loadTexture(): Unable to load '" + filename + "': " + SDL_GetError());
     }
 
-    return buildTexture(out);
+    int width = 0, height = 0;
+    SDL_QueryTexture(out, nullptr, nullptr, &width, &height);
+
+    return Texture{ out, SDL_Rect{ 0, 0, width, height }, { width, height } };
 }
 
 
@@ -56,27 +55,10 @@ Texture newTexture(SDL_Renderer* renderer, const Vector<int>& dimensions)
         throw std::runtime_error(std::string{ "newTexture() : Unable to create new texture : " } + SDL_GetError());
     }
 
-    return buildTexture(texture);
-}
+    int width = 0, height = 0;
+    SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
 
-
-Texture buildTexture(SDL_Texture* texture)
-{
-    const auto textureProperties = SDL_GetTextureProperties(texture);
-    const Vector<int> textureSize{
-            static_cast<int>(SDL_GetNumberProperty(textureProperties, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0)),
-            static_cast<int>(SDL_GetNumberProperty(textureProperties, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0))
-    };
-
-    SDL_DestroyProperties(textureProperties);
-
-    const SDL_FRect area{
-        0.0f, 0.0f,
-        static_cast<float>(textureSize.x),
-        static_cast<float>(textureSize.y)
-    };
-
-    return { texture, area, textureSize };
+    return Texture{ texture, SDL_Rect{ 0, 0, width, height }, { width, height } };
 }
 
 

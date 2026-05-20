@@ -1,16 +1,17 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #pragma once
 
-#include <SDL3/SDL.h>
+#include "SDL_include.h"
 
 #include "Font.h"
 
@@ -24,7 +25,7 @@ public:
 	StringRender(SDL_Renderer* renderer);
 	~StringRender() = default;
 
-	void drawString(Font& font, std::string_view text, const Point<int>& position) const;
+	void drawString(Font& font, std::string_view text, const MPoint<int>& position) const;
 
 private:
 

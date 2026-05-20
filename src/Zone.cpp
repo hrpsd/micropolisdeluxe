@@ -1,27 +1,32 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
-#include "Zone.h"
+#include "main.h"
 
 #include "s_alloc.h"
 #include "s_sim.h"
 
-#include "Util.h"
+#include "w_util.h"
 
 #include "CityProperties.h"
 #include "Map.h"
 #include "Power.h"
 #include "Traffic.h"
+#include "Zone.h"
 
 #include <algorithm>
 
+
+#define ASCBIT (ANIMBIT | CONDBIT | BURNBIT)
+#define REGBIT (CONDBIT | BURNBIT)
 
 const std::array<Vector<int>, 4> AdjacentVector =
 { {
@@ -49,15 +54,15 @@ const std::array<Vector<int>, 9> AdjacentVector8 =
 /*
  * set bit in MapWord depending on powermap
  */
-bool setZonePower(const Point<int>& location)
+bool setZonePower(const MPoint<int>& location)
 {
     if (testPowerBit(location))
     {
-        tileValue(location) |= PowerBit;
+        tileValue(location) |= PWRBIT;
         return true;
     }
 
-    tileValue(location) &= ~PowerBit;
+    tileValue(location) &= ~PWRBIT;
     return false;
 }
 
@@ -67,12 +72,12 @@ void zonePlop(const int base)
     // Check for fire and flooding
     for (int i{}; i < 9; ++i)
     {
-        const Point<int> coordinates = SimulationTarget + AdjacentVector8[i];
+        const MPoint<int> coordinates = SimulationTarget + AdjacentVector8[i];
 
-        if (coordinatesValid(coordinates))
+        if (CoordinatesValid(coordinates))
         {
             int tile = maskedTileValue(coordinates);
-            if ((tile >= Flood) && (tile < BridgeBase))
+            if ((tile >= FLOOD) && (tile < ROADBASE))
             {
                 return;
             }
@@ -82,77 +87,77 @@ void zonePlop(const int base)
     int tileBase{ base };
     for (int i{}; i < 9; ++i)
     {
-        const Point<int> coordinates = SimulationTarget + AdjacentVector8[i];
+        const MPoint<int> coordinates = SimulationTarget + AdjacentVector8[i];
 
-        if (coordinatesValid(coordinates))
+        if (CoordinatesValid(coordinates))
         {
-            tileValue(coordinates) = tileBase | BurnableConductiveBits;
+            tileValue(coordinates) = tileBase + BNCNBIT;
         }
 
         ++tileBase;
     }
 
     setZonePower(SimulationTarget);
-    tileValue(SimulationTarget) |= ZonedBit | BulldozableBit;
+    tileValue(SimulationTarget) |= ZONEBIT + BULLBIT;
 }
 
 
 void plopResidential(int density, int value)
 {
-    const int base{ (((value * 4) + density) * 9) + ResidentialZoneBase - 4 };
+    const int base{ (((value * 4) + density) * 9) + RZB - 4 };
     zonePlop(base);
 }
 
 
 void plopCommercial(int density, int value)
 {
-    const int base{ (((value * 5) + density) * 9) + CommercialZoneBase - 4 };
+    const int base{ (((value * 5) + density) * 9) + CZB - 4 };
     zonePlop(base);
 }
 
 
 void plopIndustrial(int density, int value)
 {
-    const int base{ (((value * 4) + density) * 9) + (IndustrialZoneBase - 4) };
+    const int base{ (((value * 4) + density) * 9) + (IZB - 4) };
     zonePlop(base);
 }
 
 
 int residentialZonePopulation(int tile)
 {
-    const int density{ (((tile - ResidentialZoneBase) / 9) % 4) };
+    const int density{ (((tile - RZB) / 9) % 4) };
     return ((density * 8) + 16);
 }
 
 
 int commercialZonePopulation(int tile)
 {
-    const int density{ (((tile - CommercialZoneBase) / 9) % 5) + 1 };
+    const int density{ (((tile - CZB) / 9) % 5) + 1 };
     return (tile == CommercialEmpty) ? 0 : density;
 }
 
 
 int industrialZonePopulation(int tile)
 {
-    const int density{ (((tile - IndustrialZoneBase) / 9) % 4) + 1 };
+    const int density{ (((tile - IZB) / 9) % 4) + 1 };
     return (tile == IndustryEmpty) ? 0 : density;
 }
 
 
 void spawnHospital()
 {
-    if (CurrentTileMasked == Hospital)
+    if (CurrentTileMasked == HOSPITAL)
     {
-        HospitalCount++;
+        HospPop++;
 
         if (!(CityTime % 16))/*post*/
         {
-            RepairZone(Hospital, 3);
+            RepairZone(HOSPITAL, 3);
         }
 
-        if (HospitalBuildCount == -1)
+        if (NeedHosp == -1)
         {
-            if (!randomRange(0, 20))
+            if (!RandomRange(0, 20))
             {
                 zonePlop(ResidentialBase);
             }
@@ -163,18 +168,18 @@ void spawnHospital()
 
 void spawnChurch()
 {
-    if (CurrentTileMasked == Church)
+    if (CurrentTileMasked == CHURCH)
     {
-        ChurchCount++;
+        ChurchPop++;
 
         if (!(CityTime & 16))/*post*/
         {
-            RepairZone(Church, 3);
+            RepairZone(CHURCH, 3);
         }
 
-        if (ChurchBuildCount == -1)
+        if (NeedChurch == -1)
         {
-            if (!randomRange(0, 20))
+            if (!RandomRange(0, 20))
             {
                 zonePlop(ResidentialBase);
             }
@@ -199,31 +204,33 @@ void setSmoke(bool ZonePower)
     static const int AniTabC[8] = { IND1,    0, IND2, IND4,    0,    0, IND6, IND8 };
     //static const int AniTabD[8] = { IND1,    0, IND3, IND5,    0,    0, IND7, IND9 };
     
-    if (CurrentTileMasked < IndustrialZoneBase)
+    if (CurrentTileMasked < IZB)
     {
         return;
     }
 
-    int z{ (CurrentTileMasked - IndustrialZoneBase) / 8 };
+    int z{ (CurrentTileMasked - IZB) / 8 };
     z = z % 8;
 
     if (animateTile[z])
     {
-        const Point<int> location{ SimulationTarget + AdjacentVector8[z] };
-        if (coordinatesValid(location))
+        const MPoint<int> location{ SimulationTarget + AdjacentVector8[z] };
+        if (CoordinatesValid(location))
         {
             if (ZonePower)
             {
                 if ((maskedTileValue(location)) == AniTabC[z])
                 {
-                    tileValue(location) = (SmokeBase + AniTabA[z]) | (AnimatedBit | ConductiveBit | BurnableBit);
+                    tileValue(location) = ASCBIT | (SMOKEBASE + AniTabA[z]);
+                    //tileValue(location) = ASCBIT | (SMOKEBASE + AniTabB[z]);
                 }
             }
             else
             {
-                if ((maskedTileValue(location)) > static_cast<unsigned int>(AniTabC[z]))
+                if ((int)(maskedTileValue(location)) > AniTabC[z])
                 {
-                    tileValue(location) = AniTabC[z] | (ConductiveBit | BurnableBit);
+                    tileValue(location) = REGBIT | AniTabC[z];
+                    //tileValue(location) = REGBIT | AniTabD[z];
                 }
             }
         }
@@ -233,10 +240,10 @@ void setSmoke(bool ZonePower)
 
 void makeHospital()
 {
-    if (HospitalBuildCount > 0)
+    if (NeedHosp > 0)
     {
-        zonePlop(Hospital - 4);
-        HospitalBuildCount = 0;
+        zonePlop(HOSPITAL - 4);
+        NeedHosp = false;
         return;
     }
 }
@@ -244,10 +251,10 @@ void makeHospital()
 
 void makeChurch()
 {
-    if (ChurchBuildCount > 0)
+    if (NeedChurch > 0)
     {
-        zonePlop(Church - 4);
-        ChurchBuildCount = 0;
+        zonePlop(CHURCH - 4);
+        NeedChurch = false;
         return;
     }
 }
@@ -290,10 +297,10 @@ int evaluateHouseLot(int x, int y)
     int score{ 1 };
     for (int i{}; i < AdjacentVector.size(); ++i)
     {
-        const Point<int> coordinates{ Point<int>{x, y} + AdjacentVector[i] };
+        const MPoint<int> coordinates{ MPoint<int>{x, y} + AdjacentVector[i] };
 
         // look for road
-        if (coordinatesValid(coordinates) && tile && (tile <= RoadLast))
+        if (CoordinatesValid(coordinates) && tile && (tile <= LASTROAD))
         {
             score++;
         }
@@ -360,8 +367,8 @@ void buildHouse(int value)
     int highestScore{};
     for (int i{ 1 }; i < 9; ++i)
     {
-        const Point<int> location = SimulationTarget + searchVector[i];
-        if (coordinatesValid(location))
+        const MPoint<int> location = SimulationTarget + searchVector[i];
+        if (CoordinatesValid(location))
         {
             const auto score = evaluateHouseLot(location.x, location.y);
             if (score != 0)
@@ -372,7 +379,7 @@ void buildHouse(int value)
                     bestLocationOffset = i;
                 }
 
-                if ((score == highestScore) && !(randomRange(0, 8)))
+                if ((score == highestScore) && !(RandomRange(0, 8)))
                 {
                     bestLocationOffset = i;
                 }
@@ -382,11 +389,11 @@ void buildHouse(int value)
 
     if (bestLocationOffset != 0)
     {
-        const Point<int> location = SimulationTarget + searchVector[bestLocationOffset];
+        const MPoint<int> location = SimulationTarget + searchVector[bestLocationOffset];
 
-        if (coordinatesValid(location))
+        if (CoordinatesValid(location))
         {
-            tileValue(location) = (House + randomRange(0, 2) + (value * 3)) | BulldozableBurnableConductiveBits;
+            tileValue(location) = HOUSE + BLBNCNBIT + RandomRange(0, 2) + (value * 3);
         }
     }
 }
@@ -465,19 +472,19 @@ void increaseIndustry(int population, int value)
 
 void convertResidentialToHomes(int value)
 {
-    tileValue(SimulationTarget) = ResidentialEmpty | BulldozableBurnableConductiveBits | ZonedBit;
+    tileValue(SimulationTarget) = ResidentialEmpty | BLBNCNBIT | ZONEBIT;
 
     for (int x{ SimulationTarget.x - 1 }; x <= SimulationTarget.x + 1; ++x)
     {
         for (int y{ SimulationTarget.y - 1 }; y <= SimulationTarget.y + 1; ++y)
         {
-            const Point<int> coordinates{ x, y };
-            if (coordinatesValid(coordinates))
+            const MPoint<int> coordinates{ x, y };
+            if (CoordinatesValid(coordinates))
             {
                 const auto tile = maskedTileValue(coordinates);
                 if (tile != ResidentialEmpty)
                 {
-                    tileValue(coordinates) = (LHTHR + value + randomRange(0, 2)) | BulldozableBurnableConductiveBits;
+                    tileValue(coordinates) = LHTHR + value + RandomRange(0, 2) + BLBNCNBIT;
                 }
             }
         }
@@ -494,13 +501,13 @@ void clearResidentialZone()
     {
         for (int y{ SimulationTarget.y - 1 }; y <= SimulationTarget.y + 1; ++y)
         {
-            const Point<int> coordinates{ x, y };
-            if (coordinatesValid(coordinates))
+            const MPoint<int> coordinates{ x, y };
+            if (CoordinatesValid(coordinates))
             {
                 const auto tile = maskedTileValue(coordinates);
                 if ((tile >= LHTHR) && (tile <= HHTHR))
                 {
-                    tileValue(coordinates) = (ResidentialBase + zoneTileOffset[index]) | BulldozableBurnableConductiveBits;
+                    tileValue(coordinates) = ResidentialBase + zoneTileOffset[index] + BLBNCNBIT;
                     return;
                 }
             }
@@ -549,7 +556,7 @@ void decreaseCommercial(int population, int value)
 
     if (population == 1)
     {
-        zonePlop(CommercialBase);
+        zonePlop(COMBASE);
         increaseRateOfGrowth(-8);
     }
 }
@@ -579,7 +586,7 @@ int housePopulation()
     {
         for (int y{ SimulationTarget.y - 1 }; y <= SimulationTarget.y + 1; ++y)
         {
-            if (coordinatesValid({x, y}))
+            if (CoordinatesValid({x, y}))
             {
                 const auto tile = maskedTileValue({x, y});
                 if ((tile >= LHTHR) && (tile <= HHTHR))
@@ -601,40 +608,40 @@ void updateIndustry(bool zonePowered)
     setSmoke(zonePowered);
 
     int zonePopulation{ industrialZonePopulation(CurrentTileMasked) };
-    IndustrialPopulationCount += zonePopulation;
-    IndustrialZoneCount++;
+    IndPop += zonePopulation;
+    IndZPop++;
 
     TrafficResult trafficResult{ TrafficResult::RouteFound };
 
-    if (zonePopulation > randomRange(0, 5))
+    if (zonePopulation > RandomRange(0, 5))
     {
         trafficResult = makeTraffic(2);
     }
 
     if (trafficResult == TrafficResult::NoTransportNearby)
     {
-        decreaseIndustry(zonePopulation, randomRange(0, 2));
+        decreaseIndustry(zonePopulation, RandomRange(0, 2));
         return;
     }
 
-    if (!(randomRange(0, 8)))
+    if (!(RandomRange(0, 8)))
     {
-        zscore = currentRCI().industrialDemand() + evaluateIndustrial(trafficResult);
+        zscore = IValve + evaluateIndustrial(trafficResult);
 
         if (!zonePowered)
         {
             zscore = -500;
         }
 
-        if ((zscore > -350) && (zscore - 26380) > rand16())
+        if ((zscore > -350) && (zscore - 26380) > Rand16())
         {
-            increaseIndustry(zonePopulation, rand16() & 1);
+            increaseIndustry(zonePopulation, Rand16() & 1);
             return;
         }
 
-        if ((zscore < 350) && (zscore + 26380) < rand16())
+        if ((zscore < 350) && (zscore + 26380) < Rand16())
         {
-            decreaseIndustry(zonePopulation, rand16() & 1);
+            decreaseIndustry(zonePopulation, Rand16() & 1);
         }
     }
 }
@@ -644,15 +651,15 @@ void updateCommercial(bool zonePowered)
 {
     int zscore, locvalve, value;
 
-    CommercialZoneCount++;
+    ComZPop++;
 
     int tpop = commercialZonePopulation(CurrentTileMasked);
 
-    CommercialPopulationCount += tpop;
+    ComPop += tpop;
 
     TrafficResult trafficResult{TrafficResult::RouteFound};
 
-    if (tpop > randomRange(0, 5))
+    if (tpop > RandomRange(0, 5))
     {
         trafficResult = makeTraffic(1);
     }
@@ -664,24 +671,24 @@ void updateCommercial(bool zonePowered)
         return;
     }
 
-    if (!(rand16() & 7))
+    if (!(Rand16() & 7))
     {
         locvalve = evaluateCommercial(trafficResult);
-        zscore = currentRCI().commercialDemand() + locvalve;
+        zscore = CValve + locvalve;
 
         if (!zonePowered)
         {
             zscore = -500;
         }
 
-        if (trafficResult == TrafficResult::RouteFound && (zscore > -350) && zscore - 26380 > rand16())
+        if (trafficResult == TrafficResult::RouteFound && (zscore > -350) && zscore - 26380 > Rand16())
         {
             value = getLandValue();
             increaseCommercial(tpop, value);
             return;
         }
 
-        if (zscore < 350 && zscore + 26380 < rand16())
+        if (zscore < 350 && zscore + 26380 < Rand16())
         {
             value = getLandValue();
             decreaseCommercial(tpop, value);
@@ -690,7 +697,7 @@ void updateCommercial(bool zonePowered)
 }
 
 
-void updateResidential(const Point<int>& location, bool zonePowered)
+void updateResidential(const MPoint<int>& location, bool zonePowered)
 {
     int residentialPopulation = 0, value = 0;
 
@@ -705,11 +712,11 @@ void updateResidential(const Point<int>& location, bool zonePowered)
         residentialPopulation = residentialZonePopulation(tileValue);
     }
 
-    ResidentialZoneCount++;
-    ResidentialPopulationCount += residentialPopulation;
+    ResZPop++;
+    ResPop += residentialPopulation;
 
     TrafficResult trafficResult{ TrafficResult::RouteFound };
-    if (residentialPopulation > randomRange(0, 35))
+    if (residentialPopulation > RandomRange(0, 35))
     {
         trafficResult = makeTraffic(0);
     }
@@ -721,18 +728,18 @@ void updateResidential(const Point<int>& location, bool zonePowered)
         return;
     }
 
-    if ((tileValue == ResidentialEmpty) || (randomRange(0, 8) == 0))
+    if ((tileValue == ResidentialEmpty) || (RandomRange(0, 8) == 0))
     {
         int locationValue = evaluateResidential(trafficResult);
-        int zoneScore = currentRCI().residentialDemand() + locationValue;
+        int zoneScore = RValve + locationValue;
         if (!zonePowered)
         {
             zoneScore = -500;
         }
 
-        if (zoneScore > -350 && zoneScore - 26380 > -rand16())
+        if (zoneScore > -350 && zoneScore - 26380 > -Rand16())
         {
-            if ((!residentialPopulation) && (!(randomRange(0, 4))))
+            if ((!residentialPopulation) && (!(RandomRange(0, 4))))
             {
                 makeHospital();
                 makeChurch();
@@ -745,7 +752,7 @@ void updateResidential(const Point<int>& location, bool zonePowered)
             return;
         }
 
-        if ((zoneScore < 350) && zoneScore + 26380 < rand16())
+        if ((zoneScore < 350) && zoneScore + 26380 < Rand16())
         {
             value = getLandValue();
             decreaseResidential(residentialPopulation, value);
@@ -754,32 +761,32 @@ void updateResidential(const Point<int>& location, bool zonePowered)
 }
 
 
-void updateZone(const Point<int>& location, const CityProperties& properties)
+void updateZone(const MPoint<int>& location, const CityProperties& properties)
 {
     bool zonePowered{ setZonePower(location) };	
 
     zonePowered ? PoweredZoneCount++ : UnpoweredZoneCount++;
 
-    if (CurrentTileMasked > PortBase) 
+    if (CurrentTileMasked > PORTBASE) 
     {
-        updateSpecialZones(zonePowered, properties);
+        DoSPZone(zonePowered, properties);
         return;
     }
 
-    if (CurrentTileMasked < Hospital)
+    if (CurrentTileMasked < HOSPITAL)
     {
         updateResidential(location, zonePowered);
         return;
     }
 
-    if (CurrentTileMasked < CommercialBase)
+    if (CurrentTileMasked < COMBASE)
     {
         spawnHospital();
         spawnChurch();
         return;
     }
 
-    if (CurrentTileMasked < IndustryBase)
+    if (CurrentTileMasked < INDBASE)
     {
         updateCommercial(zonePowered);
         return;

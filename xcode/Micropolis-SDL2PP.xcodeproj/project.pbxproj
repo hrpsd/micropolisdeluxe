@@ -7,13 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5718EAB92B551047008A62B8 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 5718EAB72B551047008A62B8 /* include */; };
-		5718EABA2B551047008A62B8 /* nfd_cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = 5718EAB82B551047008A62B8 /* nfd_cocoa.m */; };
 		5718EABC2B552B74008A62B8 /* QueryWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5718EABB2B552B74008A62B8 /* QueryWindow.cpp */; };
 		57B5F54D2B2BECC300683BF7 /* WindowStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57B5F54B2B2BECC300683BF7 /* WindowStack.cpp */; };
 		57B5F54F2B2BEDBD00683BF7 /* WindowBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57B5F54E2B2BEDBD00683BF7 /* WindowBase.cpp */; };
 		57C37B2C2958E47C0055BC50 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57C37B2B2958E47C0055BC50 /* Assets.xcassets */; };
-		57C37B2F2958E47C0055BC50 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 57C37B2D2958E47C0055BC50 /* MainMenu.xib */; };
 		57C37B842958E4FF0055BC50 /* w_resrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37B382958E4FE0055BC50 /* w_resrc.cpp */; };
 		57C37B852958E4FF0055BC50 /* g_ani.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37B392958E4FE0055BC50 /* g_ani.cpp */; };
 		57C37B862958E4FF0055BC50 /* w_sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37B422958E4FE0055BC50 /* w_sound.cpp */; };
@@ -44,8 +41,6 @@
 		57C37BAA2958E52C0055BC50 /* BudgetWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA32958E52C0055BC50 /* BudgetWindow.cpp */; };
 		57C37BAB2958E52C0055BC50 /* Connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA42958E52C0055BC50 /* Connection.cpp */; };
 		57C37BAC2958E52C0055BC50 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA52958E52C0055BC50 /* Font.cpp */; };
-		57C37BAD2958E52C0055BC50 /* FileIo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA62958E52C0055BC50 /* FileIo.cpp */; };
-		57C37BAE2958E52C0055BC50 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA72958E52C0055BC50 /* main.cpp */; };
 		57C37BAF2958E52C0055BC50 /* MiniMapWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C37BA82958E52C0055BC50 /* MiniMapWindow.cpp */; };
 		57C37BB42958E54E0055BC50 /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57C37BB12958E54D0055BC50 /* SDL2_ttf.framework */; };
 		57C37BB52958E54E0055BC50 /* SDL2_ttf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 57C37BB12958E54D0055BC50 /* SDL2_ttf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -56,12 +51,25 @@
 		57C37BC22958EAA30055BC50 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BBC2958EAA30055BC50 /* icons */; };
 		57C37BC32958EAA30055BC50 /* scenarios in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BBD2958EAA30055BC50 /* scenarios */; };
 		57C37BC42958EAA30055BC50 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BBE2958EAA30055BC50 /* sounds */; };
-		57C37BC52958EAA30055BC50 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BBF2958EAA30055BC50 /* images */; };
 		57C37BC62958EAA30055BC50 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BC02958EAA30055BC50 /* res */; };
 		57C37BC72958EAA30055BC50 /* micropolis.ico in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BC12958EAA30055BC50 /* micropolis.ico */; };
-		57E2ED752B5E219000E7E8B6 /* OptionsWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57E2ED742B5E219000E7E8B6 /* OptionsWindow.cpp */; };
 		57E8E893295E9CCE0062D57B /* EvaluationWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */; };
-		B0A420AE2DF0EB2D00EF65D4 /* WindowGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0A420AD2DF0EB2D00EF65D4 /* WindowGroup.cpp */; };
+		99397B572E2F90720001E686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99397B562E2F90720001E686 /* Foundation.framework */; };
+		99397B592E2F907A0001E686 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99397B582E2F90790001E686 /* AppKit.framework */; };
+		99397B5C2E3419550001E686 /* AboutWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99397B5B2E3419550001E686 /* AboutWindow.cpp */; };
+		99397B622E37AED60001E686 /* MessagesWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99397B612E37AED60001E686 /* MessagesWindow.cpp */; };
+		99397B672E37B1890001E686 /* StatusWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99397B662E37B1890001E686 /* StatusWindow.cpp */; };
+		99590FEE2DE64C08006F15E2 /* cities in Resources */ = {isa = PBXBuildFile; fileRef = 99590FED2DE64BAE006F15E2 /* cities */; };
+		998B5C362DEF2760002DFBC9 /* messages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 998B5C352DEF2760002DFBC9 /* messages.cpp */; };
+		999143792DDFA79B007C567C /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 999143782DDFA79B007C567C /* SDL2_mixer.framework */; };
+		9991437A2DDFA79B007C567C /* SDL2_mixer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 999143782DDFA79B007C567C /* SDL2_mixer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		99A9678F2E2E767500661869 /* SavedGamesWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A9678E2E2E767500661869 /* SavedGamesWindow.cpp */; };
+		99A967912E2E76A100661869 /* OptionsWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A967902E2E76A100661869 /* OptionsWindow.cpp */; };
+		99BDAF5D2E280EE5008F3128 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 99BDAF5C2E280EE5008F3128 /* main.mm */; };
+		99C8A4C12DDE92CC008C94E9 /* WindowGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99C8A4C02DDE92CC008C94E9 /* WindowGroup.cpp */; };
+		99C8B52E2DDF3D02008C94E9 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 99C8B52D2DDF3C10008C94E9 /* images */; };
+		99D4BB4E2DE44B290016781C /* HomeWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99D4BB4D2DE44B290016781C /* HomeWindow.cpp */; };
+		99D4BB512DE44B870016781C /* MacMenu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 99D4BB502DE44B870016781C /* MacMenu.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -72,6 +80,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				57C37BB92958E54E0055BC50 /* SDL2.framework in Embed Frameworks */,
+				9991437A2DDFA79B007C567C /* SDL2_mixer.framework in Embed Frameworks */,
 				57C37BB52958E54E0055BC50 /* SDL2_ttf.framework in Embed Frameworks */,
 				57C37BB72958E54E0055BC50 /* SDL2_image.framework in Embed Frameworks */,
 			);
@@ -81,16 +90,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		5718EAB72B551047008A62B8 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = "../../nativefiledialog-extended/src/include"; sourceTree = "<group>"; };
-		5718EAB82B551047008A62B8 /* nfd_cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = nfd_cocoa.m; path = "../../nativefiledialog-extended/src/nfd_cocoa.m"; sourceTree = "<group>"; };
 		5718EABB2B552B74008A62B8 /* QueryWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QueryWindow.cpp; path = ../../src/QueryWindow.cpp; sourceTree = "<group>"; };
 		5718EABD2B552B7D008A62B8 /* QueryWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = QueryWindow.h; path = ../../src/QueryWindow.h; sourceTree = "<group>"; };
 		57B5F54B2B2BECC300683BF7 /* WindowStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowStack.cpp; path = ../../src/WindowStack.cpp; sourceTree = "<group>"; };
 		57B5F54C2B2BECC300683BF7 /* WindowStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowStack.h; path = ../../src/WindowStack.h; sourceTree = "<group>"; };
 		57B5F54E2B2BEDBD00683BF7 /* WindowBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowBase.cpp; path = ../../src/WindowBase.cpp; sourceTree = "<group>"; };
-		57C37B252958E47B0055BC50 /* Micropolis-SDL2PP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Micropolis-SDL2PP.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		57C37B252958E47B0055BC50 /* Micropolis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Micropolis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57C37B2B2958E47C0055BC50 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		57C37B2E2958E47C0055BC50 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		57C37B322958E47C0055BC50 /* Micropolis_SDL2PP.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Micropolis_SDL2PP.entitlements; sourceTree = "<group>"; };
 		57C37B382958E4FE0055BC50 /* w_resrc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = w_resrc.cpp; path = ../../src/w_resrc.cpp; sourceTree = "<group>"; };
 		57C37B392958E4FE0055BC50 /* g_ani.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = g_ani.cpp; path = ../../src/g_ani.cpp; sourceTree = "<group>"; };
@@ -155,7 +161,6 @@
 		57C37B792958E4FF0055BC50 /* w_tk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = w_tk.h; path = ../../src/w_tk.h; sourceTree = "<group>"; };
 		57C37B7A2958E4FF0055BC50 /* w_update.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = w_update.h; path = ../../src/w_update.h; sourceTree = "<group>"; };
 		57C37B7B2958E4FF0055BC50 /* w_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = w_util.h; path = ../../src/w_util.h; sourceTree = "<group>"; };
-		57C37B7C2958E4FF0055BC50 /* FileIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileIo.h; path = ../../src/FileIo.h; sourceTree = "<group>"; };
 		57C37B7D2958E4FF0055BC50 /* Colors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Colors.h; path = ../../src/Colors.h; sourceTree = "<group>"; };
 		57C37B7F2958E4FF0055BC50 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Point.h; path = ../../src/Point.h; sourceTree = "<group>"; };
 		57C37B802958E4FF0055BC50 /* BudgetWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BudgetWindow.h; path = ../../src/BudgetWindow.h; sourceTree = "<group>"; };
@@ -166,8 +171,6 @@
 		57C37BA32958E52C0055BC50 /* BudgetWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BudgetWindow.cpp; path = ../../src/BudgetWindow.cpp; sourceTree = "<group>"; };
 		57C37BA42958E52C0055BC50 /* Connection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Connection.cpp; path = ../../src/Connection.cpp; sourceTree = "<group>"; };
 		57C37BA52958E52C0055BC50 /* Font.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Font.cpp; path = ../../src/Font.cpp; sourceTree = "<group>"; };
-		57C37BA62958E52C0055BC50 /* FileIo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileIo.cpp; path = ../../src/FileIo.cpp; sourceTree = "<group>"; };
-		57C37BA72958E52C0055BC50 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../src/main.cpp; sourceTree = "<group>"; };
 		57C37BA82958E52C0055BC50 /* MiniMapWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MiniMapWindow.cpp; path = ../../src/MiniMapWindow.cpp; sourceTree = "<group>"; };
 		57C37BB12958E54D0055BC50 /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_ttf.framework; sourceTree = "<group>"; };
 		57C37BB22958E54D0055BC50 /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_image.framework; sourceTree = "<group>"; };
@@ -175,15 +178,35 @@
 		57C37BBC2958EAA30055BC50 /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../icons; sourceTree = "<group>"; };
 		57C37BBD2958EAA30055BC50 /* scenarios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scenarios; path = ../scenarios; sourceTree = "<group>"; };
 		57C37BBE2958EAA30055BC50 /* sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sounds; path = ../sounds; sourceTree = "<group>"; };
-		57C37BBF2958EAA30055BC50 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = ../images; sourceTree = "<group>"; };
 		57C37BC02958EAA30055BC50 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = ../res; sourceTree = "<group>"; };
 		57C37BC12958EAA30055BC50 /* micropolis.ico */ = {isa = PBXFileReference; lastKnownFileType = image.ico; name = micropolis.ico; path = ../micropolis.ico; sourceTree = "<group>"; };
-		57E2ED742B5E219000E7E8B6 /* OptionsWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsWindow.cpp; path = ../../src/OptionsWindow.cpp; sourceTree = "<group>"; };
-		57E2ED762B5E21A900E7E8B6 /* OptionsWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OptionsWindow.h; path = ../../src/OptionsWindow.h; sourceTree = "<group>"; };
 		57E8E891295E9A4C0062D57B /* EvaluationWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EvaluationWindow.h; path = ../../src/EvaluationWindow.h; sourceTree = "<group>"; };
 		57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = EvaluationWindow.cpp; path = ../../src/EvaluationWindow.cpp; sourceTree = "<group>"; };
-		B0A420AC2DF0EB2D00EF65D4 /* WindowGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WindowGroup.h; path = ../src/WindowGroup.h; sourceTree = SOURCE_ROOT; };
-		B0A420AD2DF0EB2D00EF65D4 /* WindowGroup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WindowGroup.cpp; path = ../src/WindowGroup.cpp; sourceTree = SOURCE_ROOT; };
+		99397B562E2F90720001E686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		99397B582E2F90790001E686 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		99397B5A2E3419550001E686 /* AboutWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AboutWindow.h; path = ../src/AboutWindow.h; sourceTree = SOURCE_ROOT; };
+		99397B5B2E3419550001E686 /* AboutWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AboutWindow.cpp; path = ../src/AboutWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99397B602E37AED60001E686 /* MessagesWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MessagesWindow.h; path = ../src/MessagesWindow.h; sourceTree = SOURCE_ROOT; };
+		99397B612E37AED60001E686 /* MessagesWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MessagesWindow.cpp; path = ../src/MessagesWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99397B632E37AF370001E686 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../src/main.cpp; sourceTree = SOURCE_ROOT; };
+		99397B652E37B1890001E686 /* StatusWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StatusWindow.h; path = ../src/StatusWindow.h; sourceTree = SOURCE_ROOT; };
+		99397B662E37B1890001E686 /* StatusWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StatusWindow.cpp; path = ../src/StatusWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99590FED2DE64BAE006F15E2 /* cities */ = {isa = PBXFileReference; lastKnownFileType = folder; name = cities; path = ../cities; sourceTree = "<group>"; };
+		998B5C352DEF2760002DFBC9 /* messages.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = messages.cpp; path = ../src/messages.cpp; sourceTree = SOURCE_ROOT; };
+		999143782DDFA79B007C567C /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_mixer.framework; sourceTree = "<group>"; };
+		99A9678D2E2E767500661869 /* SavedGamesWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SavedGamesWindow.h; path = ../src/SavedGamesWindow.h; sourceTree = SOURCE_ROOT; };
+		99A9678E2E2E767500661869 /* SavedGamesWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SavedGamesWindow.cpp; path = ../src/SavedGamesWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99A967902E2E76A100661869 /* OptionsWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsWindow.cpp; path = ../src/OptionsWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99BC2DB52DE4492C00084B9C /* OptionsWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OptionsWindow.h; path = ../src/OptionsWindow.h; sourceTree = SOURCE_ROOT; };
+		99BDAF5C2E280EE5008F3128 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = main.mm; path = ../src/main.mm; sourceTree = SOURCE_ROOT; };
+		99C8A4BF2DDE92CC008C94E9 /* WindowGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WindowGroup.h; path = ../src/WindowGroup.h; sourceTree = SOURCE_ROOT; };
+		99C8A4C02DDE92CC008C94E9 /* WindowGroup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WindowGroup.cpp; path = ../src/WindowGroup.cpp; sourceTree = SOURCE_ROOT; };
+		99C8B52D2DDF3C10008C94E9 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = ../images; sourceTree = SOURCE_ROOT; };
+		99D4BB4C2DE44B290016781C /* HomeWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HomeWindow.h; path = ../src/HomeWindow.h; sourceTree = SOURCE_ROOT; };
+		99D4BB4D2DE44B290016781C /* HomeWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HomeWindow.cpp; path = ../src/HomeWindow.cpp; sourceTree = SOURCE_ROOT; };
+		99D4BB4F2DE44B870016781C /* MacMenu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MacMenu.h; path = ../src/MacMenu.h; sourceTree = SOURCE_ROOT; };
+		99D4BB502DE44B870016781C /* MacMenu.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = MacMenu.mm; path = ../src/MacMenu.mm; sourceTree = SOURCE_ROOT; };
+		99D4BB542DE44D790016781C /* Button.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Button.h; path = ../src/Button.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,7 +214,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99397B572E2F90720001E686 /* Foundation.framework in Frameworks */,
 				57C37BB82958E54E0055BC50 /* SDL2.framework in Frameworks */,
+				999143792DDFA79B007C567C /* SDL2_mixer.framework in Frameworks */,
+				99397B592E2F907A0001E686 /* AppKit.framework in Frameworks */,
 				57C37BB42958E54E0055BC50 /* SDL2_ttf.framework in Frameworks */,
 				57C37BB62958E54E0055BC50 /* SDL2_image.framework in Frameworks */,
 			);
@@ -200,15 +226,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5718EAB62B551022008A62B8 /* NativeFileDialog */ = {
-			isa = PBXGroup;
-			children = (
-				5718EAB72B551047008A62B8 /* include */,
-				5718EAB82B551047008A62B8 /* nfd_cocoa.m */,
-			);
-			name = NativeFileDialog;
-			sourceTree = "<group>";
-		};
 		57C37B1C2958E47B0055BC50 = {
 			isa = PBXGroup;
 			children = (
@@ -222,7 +239,7 @@
 		57C37B262958E47B0055BC50 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				57C37B252958E47B0055BC50 /* Micropolis-SDL2PP.app */,
+				57C37B252958E47B0055BC50 /* Micropolis.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -230,98 +247,109 @@
 		57C37B272958E47B0055BC50 /* Micropolis-SDL2PP */ = {
 			isa = PBXGroup;
 			children = (
-				5718EAB62B551022008A62B8 /* NativeFileDialog */,
-				57C37B6E2958E4FF0055BC50 /* Budget.cpp */,
-				57C37BA32958E52C0055BC50 /* BudgetWindow.cpp */,
-				57C37BA42958E52C0055BC50 /* Connection.cpp */,
-				57C37B4B2958E4FE0055BC50 /* Evaluation.cpp */,
-				57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */,
-				57C37BA62958E52C0055BC50 /* FileIo.cpp */,
-				57C37BA52958E52C0055BC50 /* Font.cpp */,
-				57C37B392958E4FE0055BC50 /* g_ani.cpp */,
-				57C37B4E2958E4FE0055BC50 /* Graphics.cpp */,
-				57C37B502958E4FE0055BC50 /* GraphWindow.cpp */,
-				57C37BA72958E52C0055BC50 /* main.cpp */,
-				57C37B622958E4FE0055BC50 /* Map.cpp */,
-				57C37BA82958E52C0055BC50 /* MiniMapWindow.cpp */,
-				57E2ED742B5E219000E7E8B6 /* OptionsWindow.cpp */,
-				57C37B6B2958E4FF0055BC50 /* Power.cpp */,
-				5718EABB2B552B74008A62B8 /* QueryWindow.cpp */,
-				57C37BA22958E52C0055BC50 /* Rectangle.cpp */,
-				57C37B772958E4FF0055BC50 /* s_alloc.cpp */,
-				57C37B782958E4FF0055BC50 /* s_disast.cpp */,
-				57C37B522958E4FE0055BC50 /* s_fileio.cpp */,
-				57C37B602958E4FE0055BC50 /* s_gen.cpp */,
-				57C37B472958E4FE0055BC50 /* s_msg.cpp */,
-				57C37B5F2958E4FE0055BC50 /* s_sim.cpp */,
-				57C37B742958E4FF0055BC50 /* Scan.cpp */,
-				57C37B6D2958E4FF0055BC50 /* Sprite.cpp */,
-				57C37B552958E4FE0055BC50 /* StringRender.cpp */,
-				57C37B482958E4FE0055BC50 /* Texture.cpp */,
-				57C37B512958E4FE0055BC50 /* Tool.cpp */,
-				57C37B672958E4FF0055BC50 /* ToolPalette.cpp */,
-				57C37B702958E4FF0055BC50 /* Traffic.cpp */,
-				57C37B382958E4FE0055BC50 /* w_resrc.cpp */,
-				57C37B422958E4FE0055BC50 /* w_sound.cpp */,
-				57C37B4D2958E4FE0055BC50 /* w_tk.cpp */,
-				57C37B582958E4FE0055BC50 /* w_update.cpp */,
-				57C37B442958E4FE0055BC50 /* w_util.cpp */,
-				57B5F54E2B2BEDBD00683BF7 /* WindowBase.cpp */,
-				B0A420AD2DF0EB2D00EF65D4 /* WindowGroup.cpp */,
-				57B5F54B2B2BECC300683BF7 /* WindowStack.cpp */,
-				57C37B462958E4FE0055BC50 /* Zone.cpp */,
-				57C37B322958E47C0055BC50 /* Micropolis_SDL2PP.entitlements */,
+				99397B5A2E3419550001E686 /* AboutWindow.h */,
+				99397B5B2E3419550001E686 /* AboutWindow.cpp */,
 				57C37B3F2958E4FE0055BC50 /* animtab.h */,
+				57C37B2B2958E47C0055BC50 /* Assets.xcassets */,
 				57C37B3B2958E4FE0055BC50 /* BindFunction.h */,
 				57C37B492958E4FE0055BC50 /* Budget.h */,
+				57C37B6E2958E4FF0055BC50 /* Budget.cpp */,
 				57C37B802958E4FF0055BC50 /* BudgetWindow.h */,
+				57C37BA32958E52C0055BC50 /* BudgetWindow.cpp */,
+				99D4BB542DE44D790016781C /* Button.h */,
 				57C37B832958E4FF0055BC50 /* CityProperties.h */,
 				57C37B7D2958E4FF0055BC50 /* Colors.h */,
 				57C37B3D2958E4FE0055BC50 /* Connection.h */,
+				57C37BA42958E52C0055BC50 /* Connection.cpp */,
 				57C37B3C2958E4FE0055BC50 /* EffectMap.h */,
 				57C37B6C2958E4FF0055BC50 /* Evaluation.h */,
+				57C37B4B2958E4FE0055BC50 /* Evaluation.cpp */,
 				57E8E891295E9A4C0062D57B /* EvaluationWindow.h */,
-				57C37B7C2958E4FF0055BC50 /* FileIo.h */,
+				57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */,
 				57C37B4C2958E4FE0055BC50 /* Font.h */,
+				57C37BA52958E52C0055BC50 /* Font.cpp */,
 				57C37B662958E4FF0055BC50 /* g_ani.h */,
+				57C37B392958E4FE0055BC50 /* g_ani.cpp */,
 				57C37B542958E4FE0055BC50 /* Graph.h */,
 				57C37B4A2958E4FE0055BC50 /* Graphics.h */,
+				57C37B4E2958E4FE0055BC50 /* Graphics.cpp */,
 				57C37B562958E4FE0055BC50 /* GraphWindow.h */,
+				57C37B502958E4FE0055BC50 /* GraphWindow.cpp */,
+				99D4BB4C2DE44B290016781C /* HomeWindow.h */,
+				99D4BB4D2DE44B290016781C /* HomeWindow.cpp */,
+				99D4BB4F2DE44B870016781C /* MacMenu.h */,
+				99D4BB502DE44B870016781C /* MacMenu.mm */,
 				57C37B5C2958E4FE0055BC50 /* main.h */,
+				99397B632E37AF370001E686 /* main.cpp */,
+				99BDAF5C2E280EE5008F3128 /* main.mm */,
 				57C37B812958E4FF0055BC50 /* Map.h */,
+				57C37B622958E4FE0055BC50 /* Map.cpp */,
+				998B5C352DEF2760002DFBC9 /* messages.cpp */,
+				99397B602E37AED60001E686 /* MessagesWindow.h */,
+				99397B612E37AED60001E686 /* MessagesWindow.cpp */,
+				57C37B322958E47C0055BC50 /* Micropolis_SDL2PP.entitlements */,
 				57C37B5D2958E4FE0055BC50 /* MiniMapWindow.h */,
-				57E2ED762B5E21A900E7E8B6 /* OptionsWindow.h */,
+				57C37BA82958E52C0055BC50 /* MiniMapWindow.cpp */,
+				99BC2DB52DE4492C00084B9C /* OptionsWindow.h */,
+				99A967902E2E76A100661869 /* OptionsWindow.cpp */,
 				57C37B7F2958E4FF0055BC50 /* Point.h */,
 				57C37B632958E4FE0055BC50 /* PointInRectangleRange.h */,
 				57C37B682958E4FF0055BC50 /* Power.h */,
+				57C37B6B2958E4FF0055BC50 /* Power.cpp */,
 				5718EABD2B552B7D008A62B8 /* QueryWindow.h */,
+				5718EABB2B552B74008A62B8 /* QueryWindow.cpp */,
 				57C37B5E2958E4FE0055BC50 /* Rectangle.h */,
+				57C37BA22958E52C0055BC50 /* Rectangle.cpp */,
 				57C37B432958E4FE0055BC50 /* s_alloc.h */,
+				57C37B772958E4FF0055BC50 /* s_alloc.cpp */,
 				57C37B452958E4FE0055BC50 /* s_disast.h */,
+				57C37B782958E4FF0055BC50 /* s_disast.cpp */,
 				57C37B5B2958E4FE0055BC50 /* s_fileio.h */,
+				57C37B522958E4FE0055BC50 /* s_fileio.cpp */,
 				57C37B412958E4FE0055BC50 /* s_gen.h */,
+				57C37B602958E4FE0055BC50 /* s_gen.cpp */,
 				57C37B4F2958E4FE0055BC50 /* s_msg.h */,
+				57C37B472958E4FE0055BC50 /* s_msg.cpp */,
 				57C37B6A2958E4FF0055BC50 /* s_sim.h */,
+				57C37B5F2958E4FE0055BC50 /* s_sim.cpp */,
+				99A9678D2E2E767500661869 /* SavedGamesWindow.h */,
+				99A9678E2E2E767500661869 /* SavedGamesWindow.cpp */,
 				57C37B572958E4FE0055BC50 /* Scan.h */,
+				57C37B742958E4FF0055BC50 /* Scan.cpp */,
 				57C37B612958E4FE0055BC50 /* Sprite.h */,
+				57C37B6D2958E4FF0055BC50 /* Sprite.cpp */,
+				99397B652E37B1890001E686 /* StatusWindow.h */,
+				99397B662E37B1890001E686 /* StatusWindow.cpp */,
 				57C37B642958E4FE0055BC50 /* StringRender.h */,
+				57C37B552958E4FE0055BC50 /* StringRender.cpp */,
 				57C37B3E2958E4FE0055BC50 /* Texture.h */,
+				57C37B482958E4FE0055BC50 /* Texture.cpp */,
 				57C37B822958E4FF0055BC50 /* Tool.h */,
+				57C37B512958E4FE0055BC50 /* Tool.cpp */,
 				57C37B6F2958E4FF0055BC50 /* ToolPalette.h */,
+				57C37B672958E4FF0055BC50 /* ToolPalette.cpp */,
 				57C37B402958E4FE0055BC50 /* Traffic.h */,
+				57C37B702958E4FF0055BC50 /* Traffic.cpp */,
 				57C37B752958E4FF0055BC50 /* Vector.h */,
 				57C37B722958E4FF0055BC50 /* VectorSizeRange.h */,
 				57C37B652958E4FF0055BC50 /* w_resrc.h */,
+				57C37B382958E4FE0055BC50 /* w_resrc.cpp */,
 				57C37B762958E4FF0055BC50 /* w_sound.h */,
+				57C37B422958E4FE0055BC50 /* w_sound.cpp */,
 				57C37B792958E4FF0055BC50 /* w_tk.h */,
+				57C37B4D2958E4FE0055BC50 /* w_tk.cpp */,
 				57C37B7A2958E4FF0055BC50 /* w_update.h */,
+				57C37B582958E4FE0055BC50 /* w_update.cpp */,
 				57C37B7B2958E4FF0055BC50 /* w_util.h */,
+				57C37B442958E4FE0055BC50 /* w_util.cpp */,
 				57C37B5A2958E4FE0055BC50 /* WindowBase.h */,
-				B0A420AC2DF0EB2D00EF65D4 /* WindowGroup.h */,
+				57B5F54E2B2BEDBD00683BF7 /* WindowBase.cpp */,
+				99C8A4BF2DDE92CC008C94E9 /* WindowGroup.h */,
+				99C8A4C02DDE92CC008C94E9 /* WindowGroup.cpp */,
 				57B5F54C2B2BECC300683BF7 /* WindowStack.h */,
+				57B5F54B2B2BECC300683BF7 /* WindowStack.cpp */,
 				57C37B3A2958E4FE0055BC50 /* Zone.h */,
-				57C37B2B2958E47C0055BC50 /* Assets.xcassets */,
-				57C37B2D2958E47C0055BC50 /* MainMenu.xib */,
+				57C37B462958E4FE0055BC50 /* Zone.cpp */,
 			);
 			path = "Micropolis-SDL2PP";
 			sourceTree = "<group>";
@@ -329,6 +357,9 @@
 		57C37BB02958E54D0055BC50 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				99397B582E2F90790001E686 /* AppKit.framework */,
+				99397B562E2F90720001E686 /* Foundation.framework */,
+				999143782DDFA79B007C567C /* SDL2_mixer.framework */,
 				57C37BB22958E54D0055BC50 /* SDL2_image.framework */,
 				57C37BB12958E54D0055BC50 /* SDL2_ttf.framework */,
 				57C37BB32958E54E0055BC50 /* SDL2.framework */,
@@ -339,8 +370,9 @@
 		57C37BBB2958EA690055BC50 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				99590FED2DE64BAE006F15E2 /* cities */,
 				57C37BBC2958EAA30055BC50 /* icons */,
-				57C37BBF2958EAA30055BC50 /* images */,
+				99C8B52D2DDF3C10008C94E9 /* images */,
 				57C37BC12958EAA30055BC50 /* micropolis.ico */,
 				57C37BC02958EAA30055BC50 /* res */,
 				57C37BBD2958EAA30055BC50 /* scenarios */,
@@ -352,9 +384,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		57C37B242958E47B0055BC50 /* Micropolis-SDL2PP */ = {
+		57C37B242958E47B0055BC50 /* Micropolis */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 57C37B352958E47C0055BC50 /* Build configuration list for PBXNativeTarget "Micropolis-SDL2PP" */;
+			buildConfigurationList = 57C37B352958E47C0055BC50 /* Build configuration list for PBXNativeTarget "Micropolis" */;
 			buildPhases = (
 				57C37B212958E47B0055BC50 /* Sources */,
 				57C37B222958E47B0055BC50 /* Frameworks */,
@@ -365,9 +397,9 @@
 			);
 			dependencies = (
 			);
-			name = "Micropolis-SDL2PP";
+			name = Micropolis;
 			productName = "Micropolis-SDL2PP";
-			productReference = 57C37B252958E47B0055BC50 /* Micropolis-SDL2PP.app */;
+			productReference = 57C37B252958E47B0055BC50 /* Micropolis.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -397,7 +429,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				57C37B242958E47B0055BC50 /* Micropolis-SDL2PP */,
+				57C37B242958E47B0055BC50 /* Micropolis */,
 			);
 		};
 /* End PBXProject section */
@@ -407,15 +439,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99C8B52E2DDF3D02008C94E9 /* images in Resources */,
 				57C37BC72958EAA30055BC50 /* micropolis.ico in Resources */,
-				57C37BC52958EAA30055BC50 /* images in Resources */,
 				57C37BC42958EAA30055BC50 /* sounds in Resources */,
 				57C37BC32958EAA30055BC50 /* scenarios in Resources */,
 				57C37BC22958EAA30055BC50 /* icons in Resources */,
 				57C37BC62958EAA30055BC50 /* res in Resources */,
-				5718EAB92B551047008A62B8 /* include in Resources */,
+				99590FEE2DE64C08006F15E2 /* cities in Resources */,
 				57C37B2C2958E47C0055BC50 /* Assets.xcassets in Resources */,
-				57C37B2F2958E47C0055BC50 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,15 +457,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99D4BB4E2DE44B290016781C /* HomeWindow.cpp in Sources */,
 				57C37B9E2958E4FF0055BC50 /* Scan.cpp in Sources */,
 				57C37B862958E4FF0055BC50 /* w_sound.cpp in Sources */,
-				57C37BAE2958E52C0055BC50 /* main.cpp in Sources */,
+				99397B672E37B1890001E686 /* StatusWindow.cpp in Sources */,
 				57C37B8A2958E4FF0055BC50 /* Texture.cpp in Sources */,
 				57C37B9A2958E4FF0055BC50 /* Sprite.cpp in Sources */,
+				99D4BB512DE44B870016781C /* MacMenu.mm in Sources */,
+				99A967912E2E76A100661869 /* OptionsWindow.cpp in Sources */,
 				57C37B922958E4FF0055BC50 /* StringRender.cpp in Sources */,
 				57C37B962958E4FF0055BC50 /* Map.cpp in Sources */,
 				57C37B8C2958E4FF0055BC50 /* w_tk.cpp in Sources */,
 				57C37BAB2958E52C0055BC50 /* Connection.cpp in Sources */,
+				998B5C362DEF2760002DFBC9 /* messages.cpp in Sources */,
 				57C37B8F2958E4FF0055BC50 /* Tool.cpp in Sources */,
 				57C37B852958E4FF0055BC50 /* g_ani.cpp in Sources */,
 				57C37BA02958E4FF0055BC50 /* s_disast.cpp in Sources */,
@@ -442,6 +477,7 @@
 				57C37BAC2958E52C0055BC50 /* Font.cpp in Sources */,
 				57C37B842958E4FF0055BC50 /* w_resrc.cpp in Sources */,
 				57C37B9F2958E4FF0055BC50 /* s_alloc.cpp in Sources */,
+				99397B622E37AED60001E686 /* MessagesWindow.cpp in Sources */,
 				57C37B952958E4FF0055BC50 /* s_gen.cpp in Sources */,
 				57C37BA92958E52C0055BC50 /* Rectangle.cpp in Sources */,
 				57B5F54F2B2BEDBD00683BF7 /* WindowBase.cpp in Sources */,
@@ -451,36 +487,25 @@
 				57E8E893295E9CCE0062D57B /* EvaluationWindow.cpp in Sources */,
 				57C37BAA2958E52C0055BC50 /* BudgetWindow.cpp in Sources */,
 				57C37B8E2958E4FF0055BC50 /* GraphWindow.cpp in Sources */,
+				99BDAF5D2E280EE5008F3128 /* main.mm in Sources */,
 				57C37B892958E4FF0055BC50 /* s_msg.cpp in Sources */,
 				57C37B942958E4FF0055BC50 /* s_sim.cpp in Sources */,
 				57C37B8D2958E4FF0055BC50 /* Graphics.cpp in Sources */,
 				5718EABC2B552B74008A62B8 /* QueryWindow.cpp in Sources */,
-				B0A420AE2DF0EB2D00EF65D4 /* WindowGroup.cpp in Sources */,
+				99C8A4C12DDE92CC008C94E9 /* WindowGroup.cpp in Sources */,
+				99A9678F2E2E767500661869 /* SavedGamesWindow.cpp in Sources */,
 				57B5F54D2B2BECC300683BF7 /* WindowStack.cpp in Sources */,
-				57E2ED752B5E219000E7E8B6 /* OptionsWindow.cpp in Sources */,
 				57C37B972958E4FF0055BC50 /* ToolPalette.cpp in Sources */,
-				5718EABA2B551047008A62B8 /* nfd_cocoa.m in Sources */,
-				57C37BAD2958E52C0055BC50 /* FileIo.cpp in Sources */,
 				57C37B9C2958E4FF0055BC50 /* Traffic.cpp in Sources */,
 				57C37BAF2958E52C0055BC50 /* MiniMapWindow.cpp in Sources */,
 				57C37B8B2958E4FF0055BC50 /* Evaluation.cpp in Sources */,
+				99397B5C2E3419550001E686 /* AboutWindow.cpp in Sources */,
 				57C37B902958E4FF0055BC50 /* s_fileio.cpp in Sources */,
 				57C37B992958E4FF0055BC50 /* Power.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		57C37B2D2958E47C0055BC50 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				57C37B2E2958E47C0055BC50 /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		57C37B332958E47C0055BC50 /* Debug */ = {
@@ -515,6 +540,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = Micropolis_SDL2PP.entitlements;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -533,6 +559,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = Test;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -573,6 +600,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = Micropolis_SDL2PP.entitlements;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -585,6 +613,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSDocumentsFolderUsageDescription = Test;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -599,21 +628,25 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_ENTITLEMENTS = "Micropolis-SDL2PP/Micropolis_SDL2PP.entitlements";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "SDL2_image.framework SDL2_ttf.framework SDL2.framework";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = E9RV4W2YRL;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "../nativefiledialog-extended/src/include";
+				INFOPLIST_KEY_CFBundleDisplayName = Micropolis;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.simulation-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -621,8 +654,10 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "lairworks.Micropolis-SDL2PP";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fartingponies.micropolis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
@@ -634,21 +669,25 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_ENTITLEMENTS = "Micropolis-SDL2PP/Micropolis_SDL2PP.entitlements";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "SDL2_image.framework SDL2_ttf.framework SDL2.framework";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = E9RV4W2YRL;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "../nativefiledialog-extended/src/include";
+				INFOPLIST_KEY_CFBundleDisplayName = Micropolis;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.simulation-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -656,8 +695,10 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "lairworks.Micropolis-SDL2PP";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fartingponies.micropolis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
@@ -674,7 +715,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		57C37B352958E47C0055BC50 /* Build configuration list for PBXNativeTarget "Micropolis-SDL2PP" */ = {
+		57C37B352958E47C0055BC50 /* Build configuration list for PBXNativeTarget "Micropolis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				57C37B362958E47C0055BC50 /* Debug */,

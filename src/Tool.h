@@ -1,22 +1,57 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #pragma once
 
-#include "Math/Point.h"
-#include "Math/Vector.h"
+#include "Point.h"
+#include "Vector.h"
+#include "w_resrc.h"
 
 #include <map>
 #include <string>
 
 class Budget;
+
+enum class Tool
+{
+    Residential,
+    Commercial,
+    Industrial,
+    Fire,
+    Query,
+    Police,
+    Wire,
+    Bulldoze,
+    Rail,
+    Road,
+    Stadium,
+    Park,
+    Seaport,
+    Coal,
+    Nuclear,
+    Airport,
+    Network,
+    None
+};
+
+
+struct ToolProperties
+{
+    int cost{};
+    int size{};
+    int offset{};
+    bool draggable{ false };
+    const std::string name{};
+};
+
 
 enum class ToolResult
 {
@@ -27,40 +62,30 @@ enum class ToolResult
     InvalidOperation,
     NetworkVotedNo,
     RequiresBulldozing,
-    CannotBulldoze
+    CannotBulldoze,
+    Ignore
 };
 
 
-struct Tool
-{
-    enum class Type
-    {
-        Residential,
-        Commercial,
-        Industrial,
-        Fire,
-        Query,
-        Police,
-        Wire,
-        Bulldoze,
-        Rail,
-        Road,
-        Stadium,
-        Park,
-        Seaport,
-        Coal,
-        Nuclear,
-        Airport,
-        None
-    };
+void ToolDown(const MPoint<int> location, Budget& budget);
+bool tally(int tileValue);
 
-    Type type{ Type::None };
+const ToolProperties& toolProperties(const Tool);
+const ToolProperties& pendingToolProperties();
 
-    int cost{ 0 };
-    int size{ 0 };
-    int offset{ 0 };
+ZoneStats& queryResult();
 
-    bool draggable{ false };
+Tool pendingTool();
+void pendingTool(const Tool);
 
-    const std::string name{};
-};
+void toolStart(const MPoint<int>&);
+const MPoint<int>& toolStart();
+
+void toolEnd(const MPoint<int>&);
+const MPoint<int>& toolEnd();
+
+int longestAxis(const Vector<int>&);
+void validateDraggableToolVector(Vector<int>&, Budget&);
+void executeDraggableTool(const Vector<int>&, const MPoint<int>&, Budget&);
+
+ToolResult queryTool(int x, int y, Budget&);

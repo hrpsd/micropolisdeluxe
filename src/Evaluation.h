@@ -1,11 +1,12 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #pragma once
@@ -27,13 +28,13 @@ struct Evaluation
 
     std::string pop{};
     std::string delta{};
-    std::string assessed_dollars{};
+    std::string mAssessedDollars{};
 
-    std::string cityclass{};
-    std::string citylevel{};
+    std::string mCityClass{};
+    std::string mCityLevel{};
 
-    std::string goodyes{};
-    std::string goodno{};
+    std::string mGoodYes{};
+    std::string mGoodNo{};
 
     std::string title{};
 
@@ -61,7 +62,7 @@ int cityAssessedValue();
 CityClass cityClass();
 void cityClass(const CityClass value);
 
-void CityEvaluation(const Budget& budget);
+void cityEvaluation(const Budget& budget);
 
 int cityPopulation();
 void cityPopulation(const int val);
@@ -75,9 +76,9 @@ int cityYes();
 int deltaCityPopulation();
 int deltaCityScore();
 
-void EvalInit();
+void evalInit();
 
 int trafficAverage();
 
-void ChangeEval();
-void refreshCityEvaluation(const CityProperties& properties);
+void changeEval();
+void scoreDoer(const CityProperties& properties);

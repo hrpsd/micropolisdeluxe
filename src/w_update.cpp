@@ -1,13 +1,16 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
+#include "gameOptions.h"
+
 #include "w_update.h"
 
 #include "Budget.h"
@@ -20,26 +23,37 @@
 
 #include "w_sound.h"
 #include "w_tk.h"
-#include "Util.h"
+#include "w_util.h"
 
 
 #include <algorithm>
 #include <limits>
 #include <string>
-#include <vector>
 
 
 namespace
 {
-    int LastCityTime{};
-    int LastCityYear{};
-    int CurrentCityYear{};
-    Month::Enum LastCityMonth{};
+    int lastCityTime{};
+    int lastCityYear{};
+    int lastCityMonth{};
 
     bool NewMonth{ false };
 
-    std::vector<IntDelegate> NewMonthCallbacks;
-    std::vector<IntDelegate> NewYearCallbacks;
+    const std::string MonthTable[12] =
+    {
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    };
 }
 
 
@@ -49,83 +63,45 @@ bool newMonth()
 }
 
 
-int lastCityTime()
+const std::string& MonthString(Month month)
 {
-    return LastCityTime;
+    return MonthTable[static_cast<int>(month)];
 }
 
 
-void lastCityTime(int tick)
+int LastCityTime()
 {
-    LastCityTime = tick;
+    return lastCityTime;
 }
 
 
-Month::Enum lastCityMonth()
+void LastCityTime(int tick)
 {
-    return LastCityMonth;
+    lastCityTime = tick;
 }
 
 
-void lastCityMonth(Month::Enum month)
+int LastCityMonth()
 {
-    LastCityMonth = month;
+    return lastCityMonth;
 }
 
 
-int lastCityYear()
+void LastCityMonth(int month)
 {
-    return LastCityYear;
+    lastCityMonth = month;
 }
 
 
-void lastCityYear(int year)
+int LastCityYear()
 {
-    LastCityYear = year;
+    return lastCityYear;
 }
 
 
-void setYear(int year)
+void LastCityYear(int year)
 {
-    // Must prevent year from going negative, since it screws up the non-floored modulo arithmetic.
-    if (year < StartingYear)
-    {
-        year = StartingYear;
-    }
-
-    year = (year - StartingYear) - (CityTime / 48);
-    CityTime += year * 48;
-    updateDate();
-}
-
-
-int currentYear()
-{
-    return CurrentCityYear;
-}
-
-
-void registerNewMonthCallback(IntDelegate callback)
-{
-    NewMonthCallbacks.push_back(callback);
-}
-
-
-void clearNewMonthCallbacks()
-{
-    NewMonthCallbacks.clear();
-}
-
-
-void registerNewYearCallback(IntDelegate callback)
-{
-	NewYearCallbacks.push_back(callback);
-}
-
-
-void clearNewYearCallbacks()
-{
-	NewYearCallbacks.clear();
+    lastCityYear = year;
 }
 
 
@@ -133,44 +109,32 @@ void updateDate()
 {
     constexpr auto megaannum = 1000000; // wierd place for this
 
-    LastCityTime = CityTime / 4;
+    lastCityTime = CityTime / 4;
 
-    CurrentCityYear = (CityTime / 48) + StartingYear;
-    Month::Enum month = static_cast<Month::Enum>((CityTime % 48) / 4);
+    int year = (CityTime / 48) + StartingYear;
+    int month = (CityTime % 48) / 4;
 
-    if (CurrentCityYear >= megaannum)
+    if (year >= megaannum)
     {
-        setYear(StartingYear);
-        CurrentCityYear = StartingYear;
+        SetYear(StartingYear);
+        year = StartingYear;
         SendMes(NotificationId::BrownoutsReported);
     }
 
-    doMessage();
+    //doMessage();
 
     NewMonth = false;
-    if ((lastCityYear() != CurrentCityYear) || (lastCityMonth() != month))
+    if ((LastCityYear() != year) || (LastCityMonth() != month))
     {
-        LastCityYear = CurrentCityYear;
-		LastCityMonth = month;
+        lastCityYear = year;
+        lastCityMonth = month;
 
-		NewMonth = true;
+        NewMonth = true;
 
-		for (const auto& callback : NewMonthCallbacks)
-		{
-			callback(static_cast<int>(month));
-		}
-
-        for (const auto& callback : NewYearCallbacks)
+        if (month == 0 && !gameOptions.mAutoBudget && !newMap())
         {
-            callback(CurrentCityYear);
-		}
-
-		// \fixme   This is inelegant. Find a better way to do this without
-		//          having to call back into a global function from here.
-		if (month == Month::Enum::Jan && !gameplayOptions().autoBudget && !newMap())
-		{
-			showBudgetWindow();
-		}
+            showBudgetWindow();
+        }
     }
 }
 
@@ -189,7 +153,7 @@ void UpdateOptionsMenu(int options)
 }
 
 
-void updateFunds(Budget& budget)
+void UpdateFunds(Budget& budget)
 {
     budget.PreviousFunds(budget.CurrentFunds());
     budget.CurrentFunds(std::clamp(budget.CurrentFunds(), 0, std::numeric_limits<int>::max()));

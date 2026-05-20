@@ -1,0 +1,76 @@
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
+//
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
+//
+// Portions Copyright © 1989-2007 Electronic Arts Inc.
+//
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
+// it under the terms of the GNU GPLv3, with additional terms. See the README
+// file, included in this distribution, for details.
+#pragma once
+
+#include <memory>
+#include <functional>
+
+#include "SDL_include.h"
+
+#include "main.h"
+#include "Budget.h"
+#include "Font.h"
+#include "Point.h"
+#include "StringRender.h"
+#include "Texture.h"
+#include "WindowBase.h"
+
+
+class BudgetWindow : public WindowBase
+{
+public:
+	enum class ButtonId
+	{
+		None,
+		TaxRateUp,
+		TaxRateDown,
+		TransportUp,
+		TransportDown,
+		PoliceUp,
+		PoliceDown,
+		FireUp,
+		FireDown,
+		Accept
+	};
+
+	static constexpr auto ButtonStateNormal = 0;
+	static constexpr auto ButtonStatePressed = 1;
+
+public:
+	BudgetWindow() = delete;
+	BudgetWindow(const BudgetWindow&) = delete;
+	const BudgetWindow& operator=(const BudgetWindow&) = delete;
+
+	BudgetWindow(SDL_Renderer* renderer, const StringRender& stringRenderer, Budget& budget);
+
+	void draw();
+	void update() override;
+
+private:
+	void onMouseDown(const MPoint<int>& pos) override;
+	void onMouseUp() override;
+
+	void handleMouseDown(const ButtonId id);
+
+	void onPositionChanged(const MPoint<int>& pos) override;
+
+	Budget& mBudget;
+
+	SDL_Renderer* mRenderer{ nullptr };
+	const StringRender& mStringRenderer;
+
+	std::unique_ptr<Font> mFont;
+
+	Texture mTexture{};
+
+	ButtonId mButtonDownId{ ButtonId::None };
+};

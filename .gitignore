@@ -1,23 +1,18 @@
 /.vs
 /*.user
 /micropolis-sdl2
-/images/*.bmp
-/res/*.ttf
-/icons/24
-/icons/32
-/icons/64
-*.psd
+# /images/*.bmp
+# /res/*.ttf
+# /icons/24
+# /icons/32
+# /icons/64
+# *.psd
 .DS_Store
 /xcode/Micropolis-SDL2PP.xcodeproj/project.xcworkspace/xcuserdata
 /xcode/Micropolis-SDL2PP.xcodeproj/xcuserdata
 /xcode/.DS_Store
-/icons/src
+# /icons/src
 /x64
-/*.dll
-/*.exe
-/*.ini
-/*.aps
-/vcpkg_installed
-/micropolis-sdlpp
-/png
-/doc
+/packages
+/src/.claude
+/dist

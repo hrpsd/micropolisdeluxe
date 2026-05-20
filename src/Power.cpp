@@ -1,13 +1,15 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
+#include "main.h"
 
 #include "Map.h"
 
@@ -27,10 +29,10 @@ namespace
     constexpr auto PowerMapSize = (PowerMapRow * SimHeight);
     constexpr auto PowerStackSize = ((SimWidth * SimHeight) / 4);
 
-    std::stack<Point<int>> PowerStack;
+    std::stack<MPoint<int>> PowerStack;
     std::array<int, PowerMapSize> PowerMap{};
 
-    const Point<int>& topPowerStack()
+    const MPoint<int>& topPowerStack()
     {
         return PowerStack.top();
     }
@@ -46,7 +48,7 @@ namespace
 };
 
 
-void pushPowerStack(const Point<int>& location)
+void pushPowerStack(const MPoint<int>& location)
 {
 
     if (PowerStack.size() < PowerStackSize)
@@ -71,7 +73,7 @@ void resetPowerMap()
 }
 
 
-void setPowerBit(const Point<int>& location)
+void setPowerBit(const MPoint<int>& location)
 {
     /* XXX: assumes 120x100 */
     const auto powerWrd = (location.x / 16) + (location.y * 8);
@@ -79,17 +81,17 @@ void setPowerBit(const Point<int>& location)
 }
 
 
-bool powerBitSet(const Point<int>& location)
+bool powerBitSet(const MPoint<int>& location)
 {
     const auto powerWord = (location.x / 16) + (location.y * 8);
     return (PowerMap[powerWord] & (1 << (location.x & 15))) != 0;
 }
 
 
-bool testPowerBit(const Point<int>& location)
+bool testPowerBit(const MPoint<int>& location)
 {
     const auto tile = maskedTileValue(location.x, location.y);
-    if ((tile == NuclearPower) || (tile == PowerPlant))
+    if ((tile == NUCLEAR) || (tile == POWERPLANT))
     {
         return true;
     }
@@ -111,7 +113,7 @@ bool isTileConductive(SearchDirection direction)
 
     if (moveSimulationTarget(direction))
     {
-        if ((tileValue(SimulationTarget) & ConductiveBit) && !testPowerBit(SimulationTarget))
+        if ((tileValue(SimulationTarget) & CONDBIT) && !testPowerBit(SimulationTarget))
         {
             SimulationTarget = saved;
             return true;
@@ -128,7 +130,7 @@ void powerScan()
 {
     resetPowerMap();
 
-    int powerAvailable = (CoalPowerPlantCount * CoalPowerProvided) + (NuclearPowerPlantCount * NuclearPowerProvided);
+    int powerAvailable = (CoalPop * CoalPowerProvided) + (NuclearPop * NuclearPowerProvided);
     int powerConsumed = 0;
 
     int conductiveTileCount{};

@@ -1,52 +1,65 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "Map.h"
 
+#include "AppWindows.h"
 #include "s_alloc.h"
-#include "Sprite.h"
+
+#include "Point.h"
+
 #include "Texture.h"
-#include "Util.h"
+#include "Sprite.h"
 
-#include "Math/Point.h"
+#include "w_util.h"
 
-#include <vector>
+#include <array>
 
-#include <SDL3/SDL.h>
+#include "SDL_include.h"
 
-extern SDL_Renderer* MainWindowRenderer;
+extern SDL_Renderer* mainWindowRenderer;
 
 extern Texture BigTileset;
 extern Texture MainMapTexture;
 
 
+std::array<std::array<int, SimHeight>, SimWidth> map;
+std::vector<std::array<std::array<int, SimHeight>, SimWidth>> maps;
+
 namespace
 {
-	std::vector<int> MapBuffer;
-
-	SDL_FRect TileDrawRect{ 0, 0, 16, 16 };
-	bool Blink{ false };
+	SDL_Rect tileRect{ 0, 0, 16, 16 };
+	bool flagBlink{ false };
 };
 
 
-MapData getMapData()
+void toggleBlinkFlag()
 {
-	return MapData
-	{
-		reinterpret_cast<const char*>(MapBuffer.data()),
-		static_cast<unsigned int>(MapBuffer.size() * sizeof(int))
-	};
+	flagBlink = !flagBlink;
 }
 
 
-int& tileValue(const Point<int>& location)
+void resetMap()
+{
+	for (int row = 0; row < SimWidth; ++row)
+	{
+		for (int col = 0; col < SimHeight; ++col)
+		{
+			map[row][col] = 0;
+		}
+	}
+}
+
+
+int& tileValue(const MPoint<int>& location)
 {
 	return tileValue(location.x, location.y);
 }
@@ -54,11 +67,11 @@ int& tileValue(const Point<int>& location)
 
 int& tileValue(const int x, const int y)
 {
-	return MapBuffer[static_cast<size_t>(x) * SimHeight + static_cast<size_t>(y)];
+	return map[x][y];
 }
 
 
-unsigned int maskedTileValue(const Point<int>& location)
+unsigned int maskedTileValue(const MPoint<int>& location)
 {
 	return maskedTileValue(location.x, location.y);
 }
@@ -66,73 +79,41 @@ unsigned int maskedTileValue(const Point<int>& location)
 
 unsigned int maskedTileValue(const int x, const int y)
 {
-	return tileValue(x, y) & LowerMask;
+	return tileValue(x, y) & LOMASK;
 }
 
 
 unsigned int maskedTileValue(unsigned int tile)
 {
-	return tile & LowerMask;
+	return tile & LOMASK;
 }
 
 
-bool tileIsPowered(const Point<int> coordinates)
+bool tilePowered(const unsigned int tile)
 {
-	return tileIsPowered(tileValue(coordinates));
+	return tile & PWRBIT;
 }
 
-
-bool tileIsZoned(const Point<int> coordinates)
+bool tileIsZoned(const unsigned int tile)
 {
-	return tileIsZoned(tileValue(coordinates));
+	return tile & ZONEBIT;
 }
 
-
-bool tileIsRoad(const Point<int> coordinates)
+bool tileIsRoad(const MPoint<int> coordinates)
 {
-	if (!coordinatesValid(coordinates))
+	if (!CoordinatesValid(coordinates))
 	{
 		return false;
 	}
 
-	return tileIsRoad(tileValue(coordinates));
-}
+	const auto tile = maskedTileValue(coordinates);
 
-
-bool tileCanBeBulldozed(const Point<int> coordinates)
-{
-	return tileCanBeBulldozed(tileValue(coordinates));
-}
-
-
-bool tileCanBurn(const Point<int> coordinates)
-{
-	return tileCanBurn(tileValue(coordinates));
-}
-
-
-bool tileIsPowered(int tile)
-{
-	return tile & PowerBit;
-}
-
-
-bool tileIsZoned(int tile)
-{
-	return tile & ZonedBit;
-}
-
-
-bool tileIsRoad(int tile)
-{
-	const auto maskedTile = maskedTileValue(tile);
-
-	if (maskedTile < BridgeBase || maskedTile > RailLast)
+	if (tile < ROADBASE || tile > LASTRAIL)
 	{
 		return false;
 	}
 
-	if ((maskedTile >= PowerBase) && (maskedTile < RailHorizontalPowerVertical))
+	if ((tile >= POWERBASE) && (tile < RAILHPOWERV))
 	{
 		return false;
 	}
@@ -140,40 +121,20 @@ bool tileIsRoad(int tile)
 	return true;
 }
 
-
-bool tileCanBeBulldozed(int tile)
+bool blink()
 {
-	return tile & BulldozableBit;
-}
-
-
-bool tileCanBurn(int tile)
-{
-	return tile & BurnableBit;
-}
-
-
-void toggleBlinkFlag()
-{
-	Blink = !Blink;
-}
-
-
-void ResetMap()
-{
-	MapBuffer.resize(SimWidth * SimHeight);
-	std::fill(MapBuffer.begin(), MapBuffer.end(), Dirt);
+	return flagBlink;
 }
 
 
 /**
  * Assumes \c begin and \c end are in a valid range
  */
-void drawBigMapSegment(const Point<int>& begin, const Point<int>& end)
+void drawBigMapSegment(const MPoint<int>& begin, const MPoint<int>& end)
 {
-	SDL_SetRenderTarget(MainWindowRenderer, MainMapTexture.texture);
+	SDL_SetRenderTarget(mainWindowRenderer, MainMapTexture.texture);
 
-	SDL_FRect drawRect{ 0.0f, 0.0f, 16.0f, 16.0f };
+	SDL_Rect drawRect{ begin.x, begin.y, 16, 16};
 	unsigned int tile = 0;
 
 	for (int row = begin.x; row < end.x; row++)
@@ -182,31 +143,32 @@ void drawBigMapSegment(const Point<int>& begin, const Point<int>& end)
 		{
 			tile = tileValue(row, col);
 			// Blink lightning bolt in unpowered zone center
-			if (Blink && tileIsZoned({ row, col }) && !tileIsPowered({ row, col }))
+			if (!appWindows.home->visible() && blink() && tileIsZoned(tile) && !tilePowered(tile))
 			{
-				tile = LightningBolt;
+				tile = LIGHTNINGBOLT;
 			}
 
-			drawRect = { row * drawRect.w, col * drawRect.h, drawRect.w, drawRect.h };
-
+			//drawRect = { row * drawRect.w, col * drawRect.h, drawRect.w, drawRect.h };
 			const unsigned int masked = maskedTileValue(tile);
-			TileDrawRect =
+			tileRect =
 			{
-				static_cast<float>((static_cast<int>(masked) % 32) * 16),
-				static_cast<float>((static_cast<int>(masked) / 32) * 16),
-				16.0f, 16.0f
+				(static_cast<int>(masked) % 32) * 16,
+				(static_cast<int>(masked) / 32) * 16,
+				16, 16
 			};
 
-			SDL_RenderTexture(MainWindowRenderer, BigTileset.texture, &TileDrawRect, &drawRect);
+			SDL_RenderCopy(mainWindowRenderer, BigTileset.texture, &tileRect, &drawRect);
+			drawRect.y += drawRect.h;
 		}
+		drawRect.y = 0;
+		drawRect.x += drawRect.w;
 	}
-
-	SDL_RenderPresent(MainWindowRenderer);
-	SDL_SetRenderTarget(MainWindowRenderer, nullptr);
+	//SDL_RenderPresent(mainWindowRenderer);
+	SDL_SetRenderTarget(mainWindowRenderer, nullptr);
 }
 
 
 void drawBigMap()
 {
-	drawBigMapSegment(Point<int>{0, 0}, Point<int>{SimWidth, SimHeight});
+	drawBigMapSegment(MPoint<int>{0, 0}, MPoint<int>{SimWidth, SimHeight});
 }

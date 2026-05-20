@@ -1,11 +1,12 @@
-// This file is part of Micropolis-SDLPP
-// Micropolis-SDLPP is based on Micropolis
+// This file is part of Micropolis-SDL2PP
+// Micropolis-SDL2PP is based on Micropolis
 //
-// Copyright © 2022 - 2026 Leeor Dicker
+// Copyright © 2022 - 2024 Leeor Dicker
+// Copyright © 2025 - 2026 Sylvain Nowé
 //
 // Portions Copyright © 1989-2007 Electronic Arts Inc.
 //
-// Micropolis-SDLPP is free software; you can redistribute it and/or modify
+// Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
 #include "Traffic.h"
@@ -14,7 +15,7 @@
 #include "Sprite.h"
 
 #include "s_alloc.h"
-#include "Util.h"
+#include "w_util.h"
 
 #include <algorithm>
 #include <array>
@@ -25,7 +26,7 @@ namespace
 {
     constexpr auto MaxDistance = 30;
 
-    std::stack<Point<int>> CoordinatesStack;
+    std::stack<MPoint<int>> CoordinatesStack;
 
     int Zsource;
 
@@ -54,7 +55,7 @@ namespace
     } };
 
 
-    void pushCoordinates(const Point<int> coordinates)
+    void pushCoordinates(const MPoint<int> coordinates)
     {
         CoordinatesStack.push(coordinates);
     }
@@ -77,17 +78,17 @@ namespace
         while (!CoordinatesStack.empty())
         {
             popCoordinates();
-            if (coordinatesValid(SimulationTarget))
+            if (CoordinatesValid(SimulationTarget))
             {
                 int tile = maskedTileValue(SimulationTarget);
-                if ((tile >= BridgeBase) && (tile < PowerBase))
+                if ((tile >= ROADBASE) && (tile < POWERBASE))
                 {
                     /* check for rail */
-                    const Point<int> trafficDensityMapCoordinates = SimulationTarget.skewInverseBy({ 2, 2 });
+                    const MPoint<int> trafficDensityMapCoordinates = SimulationTarget.skewInverseBy({ 2, 2 });
                     tile = TrafficDensityMap.value(trafficDensityMapCoordinates);
                     tile += 50;
 
-                    if ((tile > ResidentialBase) && (randomRange(0, 5) == 0))
+                    if ((tile > ResidentialBase) && (RandomRange(0, 5) == 0))
                     {
                         tile = ResidentialBase;
 
@@ -106,14 +107,14 @@ namespace
 
     int adjacentTile(size_t i)
     {
-        const Point<int> coordinates{ SimulationTarget + AdjacentVector[i] };
-        return coordinatesValid(coordinates) ? maskedTileValue(coordinates) : 0;
+        const MPoint<int> coordinates{ SimulationTarget + AdjacentVector[i] };
+        return CoordinatesValid(coordinates) ? maskedTileValue(coordinates) : 0;
     }
 
     bool tryGo(int distance)
     {
         size_t lastDirection = 5;
-        const int startDirection = randomRange(0, 3);
+        const int startDirection = RandomRange(0, 3);
 
         for (size_t count = startDirection; count < (startDirection + AdjacentVector.size()); count++)
         {
@@ -145,8 +146,8 @@ namespace
 
     bool driveDone()
     {
-        static int TARGL[3] = { CommercialBase, LHTHR, LHTHR };
-        static int TARGH[3] = { NuclearPower, Port, CommercialBase }; // for destinations
+        static int TARGL[3] = { COMBASE, LHTHR, LHTHR };
+        static int TARGH[3] = { NUCLEAR, PORT, COMBASE }; // for destinations
 
         // R>C C>I I>R
         for (int i{}; i < AdjacentVector.size(); ++i)
@@ -199,8 +200,8 @@ bool roadOnZonePerimeter()
 {
     for (int i{}; i < ZonePerimeterOffset.size(); ++i)
     {
-        const Point<int> coordinates = SimulationTarget + ZonePerimeterOffset[i];
-        if (coordinatesValid(coordinates))
+        const MPoint<int> coordinates = SimulationTarget + ZonePerimeterOffset[i];
+        if (CoordinatesValid(coordinates))
         {
             if (tileIsRoad(coordinates))
             {

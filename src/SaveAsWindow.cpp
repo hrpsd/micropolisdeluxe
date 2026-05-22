@@ -272,7 +272,11 @@ void SaveAsWindow::commitSave()
     if (cleaned.empty()) { return; }  // refuse to save with an empty / invalid name
 
     cityProperties.CityName(cleaned);
+    #if defined(_WIN64)
     const std::string path = "cities\\" + cleaned + ".cty";
+    #else
+    const std::string path = "cities/" + cleaned + ".cty";
+    #endif
     SaveCity(path, cityProperties, budget, gameOptions);
 
     hide();

@@ -305,7 +305,11 @@ void openGame(std::string path)
 
     std::string cityName = path;
 
+    #if defined(_WIN64)
     size_t pos = cityName.find("\\");
+    #else
+    size_t pos = cityName.find("/");
+    #endif
     if (pos != std::string::npos) {
         cityName = cityName.substr(pos + 1);
     }
@@ -321,7 +325,11 @@ void openGame(std::string path)
 
 void saveGame()
 {
+    #if defined(_WIN64)
     std::string openCityFile = "cities\\" + cityProperties.CityName() + ".cty";
+    #else
+    std::string openCityFile = "cities/" + cityProperties.CityName() + ".cty";
+    #endif
     SaveCity(openCityFile, cityProperties, budget, gameOptions);
 }
 

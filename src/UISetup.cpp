@@ -534,7 +534,11 @@ void drawThumbCityInRect(std::string path, SDL_Rect dstRect)
 
     std::string cityName = path;
 
+    #if defined(_WIN64)
     size_t pos = cityName.find("\\");
+    #else
+    size_t pos = cityName.find("/");
+    #endif
     if (pos != std::string::npos) {
         cityName = cityName.substr(pos + 1);
     }

@@ -54,6 +54,13 @@
 		57C37BC62958EAA30055BC50 /* res in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BC02958EAA30055BC50 /* res */; };
 		57C37BC72958EAA30055BC50 /* micropolis.ico in Resources */ = {isa = PBXBuildFile; fileRef = 57C37BC12958EAA30055BC50 /* micropolis.ico */; };
 		57E8E893295E9CCE0062D57B /* EvaluationWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */; };
+		992FA0212FC0248E008B7FAE /* KeyboardHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA01E2FC0248E008B7FAE /* KeyboardHandler.cpp */; };
+		992FA0232FC0248E008B7FAE /* EventDispatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA01D2FC0248E008B7FAE /* EventDispatcher.cpp */; };
+		992FA0242FC0248E008B7FAE /* MouseHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA01F2FC0248E008B7FAE /* MouseHandler.cpp */; };
+		992FA0262FC0258E008B7FAE /* Simulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA0252FC0258E008B7FAE /* Simulation.cpp */; };
+		992FA0312FC0285B008B7FAE /* SaveAsWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA0302FC0285B008B7FAE /* SaveAsWindow.cpp */; };
+		992FA0352FC0351E008B7FAE /* UISetup.mm in Sources */ = {isa = PBXBuildFile; fileRef = 992FA0342FC0351E008B7FAE /* UISetup.mm */; };
+		992FA03B2FC035C2008B7FAE /* PopupWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 992FA03A2FC035C2008B7FAE /* PopupWindow.cpp */; };
 		99397B572E2F90720001E686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99397B562E2F90720001E686 /* Foundation.framework */; };
 		99397B592E2F907A0001E686 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99397B582E2F90790001E686 /* AppKit.framework */; };
 		99397B5C2E3419550001E686 /* AboutWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99397B5B2E3419550001E686 /* AboutWindow.cpp */; };
@@ -64,7 +71,6 @@
 		999143792DDFA79B007C567C /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 999143782DDFA79B007C567C /* SDL2_mixer.framework */; };
 		9991437A2DDFA79B007C567C /* SDL2_mixer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 999143782DDFA79B007C567C /* SDL2_mixer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		99A9678F2E2E767500661869 /* SavedGamesWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A9678E2E2E767500661869 /* SavedGamesWindow.cpp */; };
-		99A967912E2E76A100661869 /* OptionsWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A967902E2E76A100661869 /* OptionsWindow.cpp */; };
 		99BDAF5D2E280EE5008F3128 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 99BDAF5C2E280EE5008F3128 /* main.mm */; };
 		99C8A4C12DDE92CC008C94E9 /* WindowGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99C8A4C02DDE92CC008C94E9 /* WindowGroup.cpp */; };
 		99C8B52E2DDF3D02008C94E9 /* images in Resources */ = {isa = PBXBuildFile; fileRef = 99C8B52D2DDF3C10008C94E9 /* images */; };
@@ -182,6 +188,21 @@
 		57C37BC12958EAA30055BC50 /* micropolis.ico */ = {isa = PBXFileReference; lastKnownFileType = image.ico; name = micropolis.ico; path = ../micropolis.ico; sourceTree = "<group>"; };
 		57E8E891295E9A4C0062D57B /* EvaluationWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EvaluationWindow.h; path = ../../src/EvaluationWindow.h; sourceTree = "<group>"; };
 		57E8E892295E9CCE0062D57B /* EvaluationWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = EvaluationWindow.cpp; path = ../../src/EvaluationWindow.cpp; sourceTree = "<group>"; };
+		992FA01D2FC0248E008B7FAE /* EventDispatcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = EventDispatcher.cpp; path = ../src/EventDispatcher.cpp; sourceTree = SOURCE_ROOT; };
+		992FA01E2FC0248E008B7FAE /* KeyboardHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = KeyboardHandler.cpp; path = ../src/KeyboardHandler.cpp; sourceTree = SOURCE_ROOT; };
+		992FA01F2FC0248E008B7FAE /* MouseHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MouseHandler.cpp; path = ../src/MouseHandler.cpp; sourceTree = SOURCE_ROOT; };
+		992FA0202FC0248E008B7FAE /* UISetup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UISetup.cpp; path = ../src/UISetup.cpp; sourceTree = SOURCE_ROOT; };
+		992FA0252FC0258E008B7FAE /* Simulation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Simulation.cpp; path = ../src/Simulation.cpp; sourceTree = SOURCE_ROOT; };
+		992FA02B2FC02611008B7FAE /* SDL_include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SDL_include.h; path = ../src/SDL_include.h; sourceTree = SOURCE_ROOT; };
+		992FA02C2FC0262E008B7FAE /* AppWindows.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppWindows.h; path = ../src/AppWindows.h; sourceTree = SOURCE_ROOT; };
+		992FA02F2FC0285B008B7FAE /* SaveAsWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SaveAsWindow.h; path = ../src/SaveAsWindow.h; sourceTree = SOURCE_ROOT; };
+		992FA0302FC0285B008B7FAE /* SaveAsWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SaveAsWindow.cpp; path = ../src/SaveAsWindow.cpp; sourceTree = SOURCE_ROOT; };
+		992FA0342FC0351E008B7FAE /* UISetup.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = UISetup.mm; path = ../src/UISetup.mm; sourceTree = SOURCE_ROOT; };
+		992FA0362FC035C2008B7FAE /* FontSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FontSet.h; path = ../src/FontSet.h; sourceTree = SOURCE_ROOT; };
+		992FA0372FC035C2008B7FAE /* GameOptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameOptions.h; path = ../src/GameOptions.h; sourceTree = SOURCE_ROOT; };
+		992FA0382FC035C2008B7FAE /* PopupState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PopupState.h; path = ../src/PopupState.h; sourceTree = SOURCE_ROOT; };
+		992FA0392FC035C2008B7FAE /* PopupWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PopupWindow.h; path = ../src/PopupWindow.h; sourceTree = SOURCE_ROOT; };
+		992FA03A2FC035C2008B7FAE /* PopupWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PopupWindow.cpp; path = ../src/PopupWindow.cpp; sourceTree = SOURCE_ROOT; };
 		99397B562E2F90720001E686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		99397B582E2F90790001E686 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		99397B5A2E3419550001E686 /* AboutWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AboutWindow.h; path = ../src/AboutWindow.h; sourceTree = SOURCE_ROOT; };
@@ -196,8 +217,6 @@
 		999143782DDFA79B007C567C /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_mixer.framework; sourceTree = "<group>"; };
 		99A9678D2E2E767500661869 /* SavedGamesWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SavedGamesWindow.h; path = ../src/SavedGamesWindow.h; sourceTree = SOURCE_ROOT; };
 		99A9678E2E2E767500661869 /* SavedGamesWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SavedGamesWindow.cpp; path = ../src/SavedGamesWindow.cpp; sourceTree = SOURCE_ROOT; };
-		99A967902E2E76A100661869 /* OptionsWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsWindow.cpp; path = ../src/OptionsWindow.cpp; sourceTree = SOURCE_ROOT; };
-		99BC2DB52DE4492C00084B9C /* OptionsWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OptionsWindow.h; path = ../src/OptionsWindow.h; sourceTree = SOURCE_ROOT; };
 		99BDAF5C2E280EE5008F3128 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = main.mm; path = ../src/main.mm; sourceTree = SOURCE_ROOT; };
 		99C8A4BF2DDE92CC008C94E9 /* WindowGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WindowGroup.h; path = ../src/WindowGroup.h; sourceTree = SOURCE_ROOT; };
 		99C8A4C02DDE92CC008C94E9 /* WindowGroup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WindowGroup.cpp; path = ../src/WindowGroup.cpp; sourceTree = SOURCE_ROOT; };
@@ -290,8 +309,6 @@
 				57C37B322958E47C0055BC50 /* Micropolis_SDL2PP.entitlements */,
 				57C37B5D2958E4FE0055BC50 /* MiniMapWindow.h */,
 				57C37BA82958E52C0055BC50 /* MiniMapWindow.cpp */,
-				99BC2DB52DE4492C00084B9C /* OptionsWindow.h */,
-				99A967902E2E76A100661869 /* OptionsWindow.cpp */,
 				57C37B7F2958E4FF0055BC50 /* Point.h */,
 				57C37B632958E4FE0055BC50 /* PointInRectangleRange.h */,
 				57C37B682958E4FF0055BC50 /* Power.h */,
@@ -350,6 +367,21 @@
 				57B5F54B2B2BECC300683BF7 /* WindowStack.cpp */,
 				57C37B3A2958E4FE0055BC50 /* Zone.h */,
 				57C37B462958E4FE0055BC50 /* Zone.cpp */,
+				992FA02C2FC0262E008B7FAE /* AppWindows.h */,
+				992FA01D2FC0248E008B7FAE /* EventDispatcher.cpp */,
+				992FA01E2FC0248E008B7FAE /* KeyboardHandler.cpp */,
+				992FA01F2FC0248E008B7FAE /* MouseHandler.cpp */,
+				992FA02B2FC02611008B7FAE /* SDL_include.h */,
+				992FA0252FC0258E008B7FAE /* Simulation.cpp */,
+				992FA0202FC0248E008B7FAE /* UISetup.cpp */,
+				992FA0342FC0351E008B7FAE /* UISetup.mm */,
+				992FA02F2FC0285B008B7FAE /* SaveAsWindow.h */,
+				992FA0302FC0285B008B7FAE /* SaveAsWindow.cpp */,
+				992FA0362FC035C2008B7FAE /* FontSet.h */,
+				992FA0372FC035C2008B7FAE /* GameOptions.h */,
+				992FA0382FC035C2008B7FAE /* PopupState.h */,
+				992FA0392FC035C2008B7FAE /* PopupWindow.h */,
+				992FA03A2FC035C2008B7FAE /* PopupWindow.cpp */,
 			);
 			path = "Micropolis-SDL2PP";
 			sourceTree = "<group>";
@@ -458,16 +490,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				99D4BB4E2DE44B290016781C /* HomeWindow.cpp in Sources */,
+				992FA03B2FC035C2008B7FAE /* PopupWindow.cpp in Sources */,
 				57C37B9E2958E4FF0055BC50 /* Scan.cpp in Sources */,
 				57C37B862958E4FF0055BC50 /* w_sound.cpp in Sources */,
 				99397B672E37B1890001E686 /* StatusWindow.cpp in Sources */,
 				57C37B8A2958E4FF0055BC50 /* Texture.cpp in Sources */,
 				57C37B9A2958E4FF0055BC50 /* Sprite.cpp in Sources */,
 				99D4BB512DE44B870016781C /* MacMenu.mm in Sources */,
-				99A967912E2E76A100661869 /* OptionsWindow.cpp in Sources */,
 				57C37B922958E4FF0055BC50 /* StringRender.cpp in Sources */,
 				57C37B962958E4FF0055BC50 /* Map.cpp in Sources */,
 				57C37B8C2958E4FF0055BC50 /* w_tk.cpp in Sources */,
+				992FA0212FC0248E008B7FAE /* KeyboardHandler.cpp in Sources */,
+				992FA0312FC0285B008B7FAE /* SaveAsWindow.cpp in Sources */,
+				992FA0232FC0248E008B7FAE /* EventDispatcher.cpp in Sources */,
+				992FA0242FC0248E008B7FAE /* MouseHandler.cpp in Sources */,
 				57C37BAB2958E52C0055BC50 /* Connection.cpp in Sources */,
 				998B5C362DEF2760002DFBC9 /* messages.cpp in Sources */,
 				57C37B8F2958E4FF0055BC50 /* Tool.cpp in Sources */,
@@ -486,6 +522,7 @@
 				57C37B9B2958E4FF0055BC50 /* Budget.cpp in Sources */,
 				57E8E893295E9CCE0062D57B /* EvaluationWindow.cpp in Sources */,
 				57C37BAA2958E52C0055BC50 /* BudgetWindow.cpp in Sources */,
+				992FA0352FC0351E008B7FAE /* UISetup.mm in Sources */,
 				57C37B8E2958E4FF0055BC50 /* GraphWindow.cpp in Sources */,
 				99BDAF5D2E280EE5008F3128 /* main.mm in Sources */,
 				57C37B892958E4FF0055BC50 /* s_msg.cpp in Sources */,
@@ -497,6 +534,7 @@
 				57B5F54D2B2BECC300683BF7 /* WindowStack.cpp in Sources */,
 				57C37B972958E4FF0055BC50 /* ToolPalette.cpp in Sources */,
 				57C37B9C2958E4FF0055BC50 /* Traffic.cpp in Sources */,
+				992FA0262FC0258E008B7FAE /* Simulation.cpp in Sources */,
 				57C37BAF2958E52C0055BC50 /* MiniMapWindow.cpp in Sources */,
 				57C37B8B2958E4FF0055BC50 /* Evaluation.cpp in Sources */,
 				99397B5C2E3419550001E686 /* AboutWindow.cpp in Sources */,

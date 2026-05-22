@@ -81,7 +81,7 @@ extern int defaultWindowHeight;
 #if defined(_WIN64)
 constexpr int PlatformHeightAdjust{ 20 };
 #else
-constexpr int PlatformHeightAdjust{ 0 };
+constexpr int PlatformHeightAdjust{ 180 };
 #endif
 
 

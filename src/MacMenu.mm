@@ -11,11 +11,14 @@
 #import "w_sound.h"
 #import "Sprite.h"
 #import "s_disast.h"
+#include "gameOptions.h"
+#include "MiniMapWindow.h"
 
 NSMenuItem *autoBudgetMenuItem;
 NSMenuItem *autoBulldozeMenuItem;
 NSMenuItem *disastersMenuItem;
 NSMenuItem *soundMenuItem;
+NSMenuItem *musicMenuItem;
 NSMenuItem *animationMenuItem;
 NSMenuItem *messagesMenuItem;
 NSMenuItem *noticesMenuItem;
@@ -38,152 +41,160 @@ NSMutableArray *zoomMenuItems;
 @implementation MacMenu
 
 - (void) buildMenu {
-    
-    NSMenu *menuBar = [NSMenu new];
-    
-    
-    NSMenuItem *appMenuItem = [NSMenuItem new];
-    NSMenu *appMenu = [NSMenu new];
-    [[appMenu addItemWithTitle:@"About..." action:@selector(about:) keyEquivalent:@""] setTarget:self];
-    [[appMenu addItemWithTitle:@"Save City" action:@selector(saveCity:) keyEquivalent:@"s"] setTarget:self];
-    [[appMenu addItemWithTitle:@"Save City as..." action:@selector(saveCityAs:) keyEquivalent:@"v"] setTarget:self];
-    [[appMenu addItemWithTitle:@"Choose City!" action:@selector(terminate:) keyEquivalent:@"c"] setTarget:self];
-    [appMenu addItemWithTitle:@"Quit Playing!" action:@selector(terminate:) keyEquivalent:@"q"];
-    [appMenuItem setSubmenu:appMenu];
-    [menuBar addItem:appMenuItem];
-    
-    
-    NSMenuItem *optionsMenuItem = [NSMenuItem new];
-    NSMenu *optionsMenu = [[NSMenu alloc] initWithTitle:@"Options"];
-    
-    autoBudgetMenuItem = [optionsMenu addItemWithTitle:@"Auto Budget" action:@selector(toggleAction:) keyEquivalent:@""];
-    [autoBudgetMenuItem setTarget:self];
-    [autoBudgetMenuItem setState:NSControlStateValueOn];
-    
-    autoBulldozeMenuItem = [optionsMenu addItemWithTitle:@"Auto Bulldoze" action:@selector(toggleAction:) keyEquivalent:@""];
-    [autoBulldozeMenuItem setTarget:self];
-    [autoBulldozeMenuItem setState:NSControlStateValueOn];
-    
-    disastersMenuItem = [optionsMenu addItemWithTitle:@"Disasters" action:@selector(toggleAction:) keyEquivalent:@""];
-    [disastersMenuItem setTarget:self];
-    [disastersMenuItem setState:NSControlStateValueOn];
-    
-    soundMenuItem = [optionsMenu addItemWithTitle:@"Sound" action:@selector(toggleAction:) keyEquivalent:@""];
-    [soundMenuItem setTarget:self];
-    [soundMenuItem setState:NSControlStateValueOn];
-    
-    animationMenuItem = [optionsMenu addItemWithTitle:@"Animation" action:@selector(toggleAction:) keyEquivalent:@""];
-    [animationMenuItem setTarget:self];
-    [animationMenuItem setState:NSControlStateValueOn];
-    
-    messagesMenuItem = [optionsMenu addItemWithTitle:@"Messages" action:@selector(toggleAction:) keyEquivalent:@""];
-    [messagesMenuItem setTarget:self];
-    [messagesMenuItem setState:NSControlStateValueOn];
-    
-    noticesMenuItem = [optionsMenu addItemWithTitle:@"Notices" action:@selector(toggleAction:) keyEquivalent:@""];
-    [noticesMenuItem setTarget:self];
-    [noticesMenuItem setState:NSControlStateValueOn];
-    
-    [optionsMenuItem setSubmenu: optionsMenu];
-    [menuBar addItem: optionsMenuItem];
-    
-    
-    NSMenuItem *disastersMenuItem = [NSMenuItem new];
-    NSMenu *disastersMenu = [[NSMenu alloc] initWithTitle:@"Disasters"];
-    
-    monsterMenuItem = [disastersMenu addItemWithTitle:@"Monster" action:@selector(monsterAction:) keyEquivalent:@""];
-    [monsterMenuItem setTarget:self];
-    
-    fireMenuItem = [disastersMenu addItemWithTitle:@"Fire" action:@selector(fireAction:) keyEquivalent:@""];
-    [fireMenuItem setTarget:self];
-    
-    floodMenuItem = [disastersMenu addItemWithTitle:@"Flood" action:@selector(floodAction:) keyEquivalent:@""];
-    [floodMenuItem setTarget:self];
-    
-    meltdownMenuItem = [disastersMenu addItemWithTitle:@"Meltdown" action:@selector(meltdownAction:) keyEquivalent:@""];
-    [meltdownMenuItem setTarget:self];
-    
-    tornadoMenuItem = [disastersMenu addItemWithTitle:@"Tornado" action:@selector(tornadoAction:) keyEquivalent:@""];
-    [tornadoMenuItem setTarget:self];
-    
-    earthquakeMenuItem = [disastersMenu addItemWithTitle:@"Earthquake" action:@selector(earthquakeAction:) keyEquivalent:@""];
-    [earthquakeMenuItem setTarget:self];
-    
-    [disastersMenuItem setSubmenu: disastersMenu];
-    [menuBar addItem: disastersMenuItem];
-    
-    
-    NSArray *speeds = @[@"Super Fast", @"Fast", @"Normal", @"Slow", @"Paused"];
-    speedMenuItems = [[NSMutableArray alloc] init];
-    NSMenuItem *priorityMenuItem = [NSMenuItem new];
-    NSMenu *priorityMenu = [[NSMenu alloc] initWithTitle:@"Priority"];
-    
-    for (NSString *speed in speeds) {
-        NSMenuItem *item = [priorityMenu addItemWithTitle:speed action:@selector(setSpeedAction:) keyEquivalent:@""];
-        [item setTarget:self];
-        [item setState:[speed isEqualToString:@"Normal"]];
-        [speedMenuItems addObject:item];
-    }
-    
-    [priorityMenuItem setSubmenu: priorityMenu];
-    [menuBar addItem: priorityMenuItem];
-    
-    
-    NSArray *zooms = @[@"Zoom In", @"Zoom out"];
-    NSArray *keys = @[@"+", @"-"];
-    zoomMenuItems = [[NSMutableArray alloc] init];
-    NSMenuItem *zoomMenuItem = [NSMenuItem new];
-    NSMenu *zoomMenu = [[NSMenu alloc] initWithTitle:@"Zoom"];
-    int i = 0;
-    for (NSString *zoom in zooms) {
-        NSMenuItem *item = [zoomMenu addItemWithTitle:zoom action:@selector(setZoomAction:) keyEquivalent:keys[i++]];
-        [item setTarget:self];
-        [zoomMenuItems addObject:item];
-    }
-    
-    [zoomMenuItem setSubmenu: zoomMenu];
-    [menuBar addItem: zoomMenuItem];
-    
-    
-    NSMenuItem *windowsMenuItem = [NSMenuItem new];
-    NSMenu *windowsMenu = [[NSMenu alloc] initWithTitle:@"Windows"];
-    
-    minimapMenuItem = [windowsMenu addItemWithTitle:@"Mini map" action:@selector(toggleAction:) keyEquivalent:@""];
-    [minimapMenuItem setTarget:self];
-    [minimapMenuItem setState:NSControlStateValueOn];
-    
-    budgetMenuItem = [windowsMenu addItemWithTitle:@"Budget" action:@selector(toggleAction:) keyEquivalent:@""];
-    [budgetMenuItem setTarget:self];
-    [budgetMenuItem setState:NSControlStateValueOff];
-    
-    evaluationMenuItem = [windowsMenu addItemWithTitle:@"Evaluation" action:@selector(toggleAction:) keyEquivalent:@""];
-    [evaluationMenuItem setTarget:self];
-    [evaluationMenuItem setState:NSControlStateValueOff];
-    
-    graphMenuItem = [windowsMenu addItemWithTitle:@"Graph" action:@selector(toggleAction:) keyEquivalent:@""];
-    [graphMenuItem setTarget:self];
-    [graphMenuItem setState:NSControlStateValueOff];
-    
-    [windowsMenuItem setSubmenu: windowsMenu];
-    [menuBar addItem: windowsMenuItem];
-    
-    
-    [[NSApplication sharedApplication] setMainMenu:menuBar];
+	
+	NSMenu *menuBar = [NSMenu new];
+	
+	
+	NSMenuItem *appMenuItem = [NSMenuItem new];
+	NSMenu *appMenu = [NSMenu new];
+	
+	[[appMenu addItemWithTitle:@"Home Screen" action:@selector(home:) keyEquivalent:@""] setTarget:self];
+	[[appMenu addItemWithTitle:@"Save City" action:@selector(saveCity:) keyEquivalent:@"s"] setTarget:self];
+	[[appMenu addItemWithTitle:@"Save City as..." action:@selector(saveCityAs:) keyEquivalent:@"v"] setTarget:self];
+	[[appMenu addItemWithTitle:@"About..." action:@selector(about:) keyEquivalent:@""] setTarget:self];
+	[appMenu addItemWithTitle:@"Quit Playing!" action:@selector(terminate:) keyEquivalent:@"q"];
+	[appMenuItem setSubmenu:appMenu];
+	[menuBar addItem:appMenuItem];
+	
+	
+	NSMenuItem *optionsMenuItem = [NSMenuItem new];
+	NSMenu *optionsMenu = [[NSMenu alloc] initWithTitle:@"Options"];
+	
+	autoBudgetMenuItem = [optionsMenu addItemWithTitle:@"Auto Budget" action:@selector(toggleAction:) keyEquivalent:@""];
+	[autoBudgetMenuItem setTarget:self];
+	[autoBudgetMenuItem setState:NSControlStateValueOn];
+	
+	autoBulldozeMenuItem = [optionsMenu addItemWithTitle:@"Auto Bulldoze" action:@selector(toggleAction:) keyEquivalent:@""];
+	[autoBulldozeMenuItem setTarget:self];
+	[autoBulldozeMenuItem setState:NSControlStateValueOn];
+	
+	disastersMenuItem = [optionsMenu addItemWithTitle:@"Disasters" action:@selector(toggleAction:) keyEquivalent:@""];
+	[disastersMenuItem setTarget:self];
+	[disastersMenuItem setState:NSControlStateValueOn];
+	
+	soundMenuItem = [optionsMenu addItemWithTitle:@"PlaySounds" action:@selector(toggleAction:) keyEquivalent:@""];
+	[soundMenuItem setTarget:self];
+	[soundMenuItem setState:NSControlStateValueOn];
+	
+	musicMenuItem = [optionsMenu addItemWithTitle:@"Play Music" action:@selector(toggleAction:) keyEquivalent:@""];
+	[musicMenuItem setTarget:self];
+	[musicMenuItem setState:NSControlStateValueOn];
+	
+	animationMenuItem = [optionsMenu addItemWithTitle:@"Animation" action:@selector(toggleAction:) keyEquivalent:@""];
+	[animationMenuItem setTarget:self];
+	[animationMenuItem setState:NSControlStateValueOn];
+	
+	noticesMenuItem = [optionsMenu addItemWithTitle:@"Notices" action:@selector(toggleAction:) keyEquivalent:@""];
+	[noticesMenuItem setTarget:self];
+	[noticesMenuItem setState:NSControlStateValueOn];
+	
+	[optionsMenuItem setSubmenu: optionsMenu];
+	[menuBar addItem: optionsMenuItem];
+	
+	
+	NSMenuItem *disastersMenuItem = [NSMenuItem new];
+	NSMenu *disastersMenu = [[NSMenu alloc] initWithTitle:@"Disasters"];
+	
+	monsterMenuItem = [disastersMenu addItemWithTitle:@"Monster" action:@selector(monsterAction:) keyEquivalent:@""];
+	[monsterMenuItem setTarget:self];
+	
+	fireMenuItem = [disastersMenu addItemWithTitle:@"Fire" action:@selector(fireAction:) keyEquivalent:@""];
+	[fireMenuItem setTarget:self];
+	
+	floodMenuItem = [disastersMenu addItemWithTitle:@"Flood" action:@selector(floodAction:) keyEquivalent:@""];
+	[floodMenuItem setTarget:self];
+	
+	meltdownMenuItem = [disastersMenu addItemWithTitle:@"Meltdown" action:@selector(meltdownAction:) keyEquivalent:@""];
+	[meltdownMenuItem setTarget:self];
+	
+	tornadoMenuItem = [disastersMenu addItemWithTitle:@"Tornado" action:@selector(tornadoAction:) keyEquivalent:@""];
+	[tornadoMenuItem setTarget:self];
+	
+	earthquakeMenuItem = [disastersMenu addItemWithTitle:@"Earthquake" action:@selector(earthquakeAction:) keyEquivalent:@""];
+	[earthquakeMenuItem setTarget:self];
+	
+	[disastersMenuItem setSubmenu: disastersMenu];
+	[menuBar addItem: disastersMenuItem];
+	
+	
+	NSArray *speeds = @[@"Super Fast", @"Fast", @"Normal", @"Slow", @"Paused"];
+	speedMenuItems = [[NSMutableArray alloc] init];
+	NSMenuItem *priorityMenuItem = [NSMenuItem new];
+	NSMenu *priorityMenu = [[NSMenu alloc] initWithTitle:@"Priority"];
+	
+	for (NSString *speed in speeds) {
+		NSMenuItem *item = [priorityMenu addItemWithTitle:speed action:@selector(setSpeedAction:) keyEquivalent:@""];
+		[item setTarget:self];
+		[item setState:[speed isEqualToString:@"Normal"]];
+		[speedMenuItems addObject:item];
+	}
+	
+	[priorityMenuItem setSubmenu: priorityMenu];
+	[menuBar addItem: priorityMenuItem];
+	
+	
+	NSArray *zooms = @[@"Zoom In", @"Zoom out"];
+	NSArray *keys = @[@"+", @"-"];
+	zoomMenuItems = [[NSMutableArray alloc] init];
+	NSMenuItem *zoomMenuItem = [NSMenuItem new];
+	NSMenu *zoomMenu = [[NSMenu alloc] initWithTitle:@"Zoom"];
+	int i = 0;
+	for (NSString *zoom in zooms) {
+		NSMenuItem *item = [zoomMenu addItemWithTitle:zoom action:@selector(setZoomAction:) keyEquivalent:keys[i++]];
+		[item setTarget:self];
+		[zoomMenuItems addObject:item];
+	}
+	
+	[zoomMenuItem setSubmenu: zoomMenu];
+	[menuBar addItem: zoomMenuItem];
+	
+	
+	NSMenuItem *windowsMenuItem = [NSMenuItem new];
+	NSMenu *windowsMenu = [[NSMenu alloc] initWithTitle:@"Windows"];
+	
+	minimapMenuItem = [windowsMenu addItemWithTitle:@"Mini map" action:@selector(toggleAction:) keyEquivalent:@""];
+	[minimapMenuItem setTarget:self];
+	[minimapMenuItem setState:NSControlStateValueOn];
+	
+	messagesMenuItem = [windowsMenu addItemWithTitle:@"Messages" action:@selector(toggleAction:) keyEquivalent:@""];
+	[messagesMenuItem setTarget:self];
+	[messagesMenuItem setState:NSControlStateValueOn];
+	
+	budgetMenuItem = [windowsMenu addItemWithTitle:@"Budget" action:@selector(toggleAction:) keyEquivalent:@""];
+	[budgetMenuItem setTarget:self];
+	[budgetMenuItem setState:NSControlStateValueOff];
+	
+	evaluationMenuItem = [windowsMenu addItemWithTitle:@"Evaluation" action:@selector(toggleAction:) keyEquivalent:@""];
+	[evaluationMenuItem setTarget:self];
+	[evaluationMenuItem setState:NSControlStateValueOff];
+	
+	graphMenuItem = [windowsMenu addItemWithTitle:@"Graph" action:@selector(toggleAction:) keyEquivalent:@""];
+	[graphMenuItem setTarget:self];
+	[graphMenuItem setState:NSControlStateValueOff];
+	
+	[windowsMenuItem setSubmenu: windowsMenu];
+	[menuBar addItem: windowsMenuItem];
+	
+	
+	[[NSApplication sharedApplication] setMainMenu:menuBar];
 }
 
 - (id) init {
-    if ( self = [super init] ) {
-        [self buildMenu];
-    }
-    return self;
+	if ( self = [super init] ) {
+		[self buildMenu];
+	}
+	return self;
 }
 
 - (void) menuAction: (id)sender {
-    NSLog(@"%@", sender);
-    
-    NSMenuItem *item = sender;
-    
-    
+	NSLog(@"%@", sender);
+	
+	NSMenuItem *item = sender;
+}
+
+- (void) home: (id)sender {
+	showWindowAndBringToFront(*appWindows.home);
+	showWindowAndBringToFront(*appWindows.homeMiniMap);
 }
 
 - (void) about: (id)sender {
@@ -251,18 +262,24 @@ NSMutableArray *zoomMenuItems;
     
     item.state = !item.state;
     
-    autoBudget(autoBudgetMenuItem.state);
-    autoBulldoze(autoBulldozeMenuItem.state);
-    disastersEnabled(disastersMenuItem.state);
-    userSoundOn(soundMenuItem.state);
-    animationEnabled(animationMenuItem.state);
-    noticesEnabled(noticesMenuItem.state);
-    
+	gameOptions.mAutoBudget = autoBudgetMenuItem.state;
+	gameOptions.mAutoBulldoze = autoBulldozeMenuItem.state;
+	gameOptions.mDisasters = disastersMenuItem.state;
+	gameOptions.mPlaySounds = soundMenuItem.state;
+	gameOptions.mPlayMusic = musicMenuItem.state;
+	gameOptions.mAnimation = animationMenuItem.state;
+	gameOptions.mNotices = noticesMenuItem.state;
+	
     if (sender == minimapMenuItem)
     {
         toggleMiniMapVisibility();
     }
     
+	if (sender == messagesMenuItem)
+	{
+		showMessagesWindow();
+	}
+	
     if (sender == budgetMenuItem)
     {
         showBudgetWindow();
@@ -277,6 +294,8 @@ NSMutableArray *zoomMenuItems;
     {
         showGraphWindow();
     }
+	
+	optionsChanged();
 }
 
 - (void) saveCity: (id)sender {

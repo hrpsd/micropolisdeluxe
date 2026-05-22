@@ -14,8 +14,8 @@ extern NSMenuItem *autoBudgetMenuItem;
 extern NSMenuItem *autoBulldozeMenuItem;
 extern NSMenuItem *disastersMenuItem;
 extern NSMenuItem *soundMenuItem;
+extern NSMenuItem *musicMenuItem;
 extern NSMenuItem *animationMenuItem;
-extern NSMenuItem *messagesMenuItem;
 extern NSMenuItem *noticesMenuItem;
 
 extern NSMenuItem *monsterMenuItem;
@@ -28,6 +28,7 @@ extern NSMenuItem *earthquakeMenuItem;
 extern NSMutableArray *speedMenuItems;
 
 extern NSMenuItem *minimapMenuItem;
+extern NSMenuItem *messagesMenuItem;
 extern NSMenuItem *budgetMenuItem;
 extern NSMenuItem *evaluationMenuItem;
 extern NSMenuItem *graphMenuItem;

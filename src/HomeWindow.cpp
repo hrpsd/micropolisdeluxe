@@ -153,7 +153,13 @@ void HomeWindow::initHighlightButtons()
 
         { "button3hilite", {  68, 544, 157, 90 }, false, [] { exit(0); }},
 
-        { "button4hilite", { 101, 705, 157, 90 }, false, [] { _load_file("cities/about.cty"); }},
+		{ "button4hilite", { 101, 705, 157, 90 }, false, [] {
+#if defined(_WIN64)
+			_load_file("cities\\about.cty");
+#else
+			_load_file("cities/about.cty");
+#endif
+		}},
 
         { "lefthilite",    { 540, 375,  50, 50 }, false,  // index 4 — left arrow
             [this]
@@ -229,10 +235,10 @@ SDL_Rect HomeWindow::homeScaleRect(SDL_Rect srcRect)
 
     // Background
     const SDL_Rect bgDstRect{
-        area().x + (area().width - bgWidth) / 2.0f,
-        area().y + (area().height - bgHeight) / 2.0f,
-        bgWidth,
-        bgHeight
+        (int)roundf(area().x + (area().width - bgWidth) / 2.0f),
+        (int)roundf(area().y + (area().height - bgHeight) / 2.0f),
+		(int)roundf(bgWidth),
+		(int)roundf(bgHeight)
     };
 
     SDL_Rect scaledRect = srcRect;
@@ -256,9 +262,15 @@ void HomeWindow::showScenarioPitch(int id)
 
     if (msg.messageId != 0)
     {
+		#if defined(_WIN64)
         pitch.title = _strdup(popMsgs[i].text);  // We own str's memory now.
         *strstr(pitch.title, "- ") = 0;
         char* msgText = _strdup(popMsgs[i].text);  // We own str's memory now.
+		#else
+		pitch.title = strdup(popMsgs[i].text);  // We own str's memory now.
+		*strstr(pitch.title, "- ") = 0;
+		char* msgText = strdup(popMsgs[i].text);  // We own str's memory now.
+		#endif
         msgText = strstr(msgText, "- ") + 2;  // Skip the "- " part.
         auto font = fonts.body.get();
         int textWidth = (int)roundf(viewState.windowSize.x / 4.0f);
@@ -335,10 +347,10 @@ void HomeWindow::draw()
 
     // Background
     const SDL_Rect bgDstRect { 
-        area().x + (area().width - bgWidth) / 2.0f,
-        area().y + (area().height - bgHeight) / 2.0f,
-        bgWidth,
-        bgHeight
+        (int)roundf(area().x + (area().width - bgWidth) / 2.0f),
+		(int)roundf(area().y + (area().height - bgHeight) / 2.0f),
+		(int)roundf(bgWidth),
+		(int)roundf(bgHeight)
     };
 
     SDL_RenderCopy(mRenderer, mBackground.texture, &BgRect, &bgDstRect);

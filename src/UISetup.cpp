@@ -491,10 +491,6 @@ void onWindowHide(WindowBase *window)
         graphItemChecked = MF_UNCHECKED;
 #endif
     }
-
-#if defined(_WIN64)
-    updateMenuItems();
-#endif
 }
 
 void setRenderTileSize()

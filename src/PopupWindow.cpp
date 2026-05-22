@@ -6,11 +6,9 @@
 // Micropolis-SDL2PP is free software; you can redistribute it and/or modify
 // it under the terms of the GNU GPLv3, with additional terms. See the README
 // file, included in this distribution, for details.
-#include "PopupWindow.h"
 
 #include "main.h"
 #include "AppWindows.h"
-#include "FontSet.h"
 #include "GameOptions.h"
 #include "MiniMapWindow.h"
 #include "Texture.h"
@@ -86,11 +84,19 @@ void PopupWindow::showMessage(int messageId, bool force)
     // Title up to the "- " separator becomes the WindowBase title;
     // the rest is rendered as the popup body.
     if (mTitleText) { std::free(mTitleText); mTitleText = nullptr; }
+	#if defined(_WIN64)
     mTitleText = _strdup(popMsgs[i].text);
+	#else
+	mTitleText = strdup(popMsgs[i].text);
+	#endif
     if (char* dash = strstr(mTitleText, "- ")) { *dash = 0; }
     mTitle = mTitleText;  // inherited WindowBase title text
 
+	#if defined(_WIN64)
     char* msgTextOwned = _strdup(popMsgs[i].text);
+	#else
+	char* msgTextOwned = strdup(popMsgs[i].text);
+	#endif
     char* bodyText = msgTextOwned;
     if (char* dash = strstr(bodyText, "- ")) { bodyText = dash + 2; }
 

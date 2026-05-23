@@ -61,6 +61,8 @@ public:
 
     std::string mTextFieldContent;
 
+    int lastPitch{ 0 };
+
 private:
     // ── UI element types ──────────────────────────────────────────────────────
 
@@ -120,6 +122,7 @@ private:
     void showScenarioPitch(int id);
     void drawScenarioPitch();
 
+
 private:
     SDL_Renderer* mRenderer{ nullptr };
 
@@ -143,8 +146,7 @@ private:
 
     Options mOptions;
     PopupState pitch;
-    int lastPitch;
-
+    
     // Editable text field at top-right of the home window (design-space rect on the 1200×900 canvas).
     SDL_Rect    mTextFieldRect{ 960, 28, 220, 32 };
     bool        mTextFieldFocused{ false };

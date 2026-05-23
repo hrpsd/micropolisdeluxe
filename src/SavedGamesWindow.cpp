@@ -142,6 +142,7 @@ void SavedGamesWindow::onMouseDown(const MPoint<int>& position)
         if (SDL_PointInRect(&pt, &buttonRect))
         {
             openGame(mPaths[i]);
+            appWindows.home->lastPitch = 0;
         }
         i++;
     }

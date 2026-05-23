@@ -149,7 +149,7 @@ void HomeWindow::initHighlightButtons()
     {
         { "button1hilite", {  70, 238, 157, 90 }, false, [this] { showWindowAndBringToFront(*savedGamesWindow); }},
 
-        { "button2hilite", {  62, 392, 157, 90 }, false, [this] { generateNewTerrain(); mCurrentMap = static_cast<int>(maps.size()) - 1; }},
+        { "button2hilite", {  62, 392, 157, 90 }, false, [this] { generateNewTerrain(); mCurrentMap = static_cast<int>(maps.size()) - 1; lastPitch = 0;  }},
 
         { "button3hilite", {  68, 544, 157, 90 }, false, [] { exit(0); }},
 
@@ -177,7 +177,7 @@ void HomeWindow::initHighlightButtons()
                 }
             }},
 
-        { "playhilite",    { 625, 376, 180, 50 }, false, [this] { cityProperties.CityName(mTextFieldContent); drawBigMap(); playThisMap(mDifficulty); showPopup(lastPitch, true); } },
+        { "playhilite",    { 625, 376, 180, 50 }, false, [this] { cityProperties.CityName(mTextFieldContent); drawBigMap(); playThisMap(mDifficulty); if (lastPitch != 0) showPopup(lastPitch, true); } },
     };
 }
 

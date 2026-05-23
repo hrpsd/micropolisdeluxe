@@ -303,7 +303,13 @@ NSMutableArray *zoomMenuItems;
 }
 
 - (void) saveCityAs: (id)sender {
-    saveGameAs();
+	if (appWindows.saveAs)
+	{
+		appWindows.saveAs->setCityName(cityProperties.CityName());
+		// showWindowAndBringToFront() re-centers the window for us
+		// (since saveAs isn't status/messages), so no explicit centerWindow call.
+		showWindowAndBringToFront(*appWindows.saveAs);
+	}
 }
 
 @end

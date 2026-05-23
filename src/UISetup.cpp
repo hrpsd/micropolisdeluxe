@@ -515,7 +515,7 @@ void drawThumbCityInRect(std::string path, SDL_Rect dstRect)
 
     drawBigMap();
 
-    SDL_Rect srcRect = SDL_Rect { 0, 0, SimWidth * renderTileSize, SimHeight * renderTileSize };
+    SDL_Rect srcRect = SDL_Rect { 0, 0, SimWidth * 16, SimHeight * 16 };
     SDL_RenderCopy(mainWindowRenderer, MainMapTexture.texture, &srcRect, &dstRect);
 
     dstRect.x--; dstRect.w += 2;

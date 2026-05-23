@@ -124,6 +124,7 @@ extern uint32_t mainWindowId;
 
 extern std::string resourcesPath;
 extern std::string documentsPath;
+extern std::string pathSeparator;
 
 // Textures
 extern Texture RCI_Indicator;

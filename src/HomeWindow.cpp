@@ -154,11 +154,7 @@ void HomeWindow::initHighlightButtons()
         { "button3hilite", {  68, 544, 157, 90 }, false, [] { exit(0); }},
 
 		{ "button4hilite", { 101, 705, 157, 90 }, false, [] {
-#if defined(_WIN64)
-			_load_file("cities\\about.cty");
-#else
-			_load_file("cities/about.cty");
-#endif
+			_load_file(documentsPath + pathSeparator + "about.cty");
 		}},
 
         { "lefthilite",    { 540, 375,  50, 50 }, false,  // index 4 — left arrow

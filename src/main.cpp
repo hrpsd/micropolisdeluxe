@@ -122,6 +122,7 @@ int ScenarioID;
 
 std::string resourcesPath;
 std::string documentsPath;
+std::string pathSeparator;
 
 #if defined(__APPLE__)
 MacMenu* macMenu;
@@ -180,7 +181,7 @@ static void initPlatformPaths()
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSError* error;
 
-    NSString* docFolderPath = [[fileManager URLsForDirectory:NSApplicationDirectory inDomains:NSUserDomainMask] firstObject].path;
+    NSString* docFolderPath = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] firstObject].path;
     NSLog(@"NSDocumentDirectory %@", docFolderPath);
 
     NSString* dstPath = [docFolderPath stringByAppendingPathComponent:@"cities"];
@@ -193,12 +194,14 @@ static void initPlatformPaths()
 
     resourcesPath = std::string([[[NSBundle mainBundle] resourcePath] UTF8String]);
     documentsPath = std::string([dstPath UTF8String]);
+	pathSeparator = "/";
 }
 #else
 static void initPlatformPaths()
 {
     resourcesPath = ".";
     documentsPath = "cities";
+	pathSeparator = "\\";
 }
 #endif
 

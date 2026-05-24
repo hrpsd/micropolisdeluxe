@@ -138,8 +138,8 @@ int renderTileSize{16};
 int miniTileSize{3};
 
 // Window creation dimensions — used by initRenderer() to avoid magic numbers
-int defaultWindowWidth{1280};
-int defaultWindowHeight{720};
+int defaultWindowWidth;
+int defaultWindowHeight;
 
 float scale = -1.0f;
 float ToolPaletteScale{1.0f};
@@ -216,6 +216,19 @@ static void initPlatformMenu() {}
 
 void initRenderer()
 {
+    SDL_DisplayMode displayMode;
+    SDL_GetDesktopDisplayMode(0, &displayMode);
+
+    printf("Desktop display size %d %d\n", displayMode.w, displayMode.h);
+
+    defaultWindowWidth = displayMode.w * 80 / 100 / 16 * 16;
+    defaultWindowHeight = displayMode.h * 85 / 100 / 16 * 16;
+    
+    defaultWindowWidth = std::min(defaultWindowWidth, defaultWindowHeight * 16 / 9);
+    defaultWindowHeight = defaultWindowWidth * 9 / 16;
+
+    printf("Window size %d %d\n", defaultWindowWidth, defaultWindowHeight);
+
     MainWindow = SDL_CreateWindow(
         "Micropolis Deluxe",
         SDL_WINDOWPOS_CENTERED,

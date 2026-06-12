@@ -146,7 +146,7 @@ BudgetWindow::BudgetWindow(SDL_Renderer* renderer, const StringRender& stringRen
     mStringRenderer(stringRenderer),
     mTexture(loadTexture(renderer, "images/budget.png"))
 {
-    size({456, 422});
+    size({ (int)roundf(bgRect.w * scale), (int)roundf(bgRect.h * scale) });
     closeButtonActive(true);
     //anchor();
     

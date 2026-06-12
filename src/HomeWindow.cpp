@@ -12,8 +12,8 @@
 #include "HomeWindow.h"
 
 #include "main.h"
+#include "HomeMiniMapWindow.h"
 #include "Map.h"
-#include "MiniMapWindow.h"
 #include "s_fileio.h"
 #include "SDL_include.h"
 
@@ -332,29 +332,36 @@ void HomeWindow::drawScenarioPitch()
         }
     }
 }
+SDL_Rect HomeWindow::backgroundRect() const
+{
+    const float bgWidth = fminf(area().width, (float)BgRect.w / (float)BgRect.h * area().height);
+    const float bgHeight = bgWidth * (float)BgRect.h / (float)BgRect.w;
+
+    return
+    {
+        (int)roundf(area().x + (area().width - bgWidth) / 2.0f),
+        (int)roundf(area().y + (area().height - bgHeight) / 2.0f),
+        (int)roundf(bgWidth),
+        (int)roundf(bgHeight)
+    };
+}
+
+
 void HomeWindow::draw()
 {
     SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, 255);
     const SDL_Rect windowRect{ 0, 0, viewState.windowSize.x, viewState.windowSize.y };
     SDL_RenderFillRect(mRenderer, &windowRect);
 
-    float bgWidth = fminf(area().width, (float)BgRect.w / (float)BgRect.h * area().height);
-    float bgHeight = bgWidth * (float)BgRect.h / (float)BgRect.w;
-
     // Background
-    const SDL_Rect bgDstRect { 
-        (int)roundf(area().x + (area().width - bgWidth) / 2.0f),
-		(int)roundf(area().y + (area().height - bgHeight) / 2.0f),
-		(int)roundf(bgWidth),
-		(int)roundf(bgHeight)
-    };
+    const SDL_Rect bgDstRect = backgroundRect();
 
     SDL_RenderCopy(mRenderer, mBackground.texture, &BgRect, &bgDstRect);
 
-    appWindows.homeMiniMap->position(MPoint<int> {
-        (int)roundf(bgDstRect.x - 0.5f * miniTileSize * SimWidth + roundf(720.0f) * bgWidth / (float)BgRect.w),
-        (int)roundf(bgDstRect.y - 0.5f * miniTileSize * SimHeight + roundf((178.0f - PlatformHeightAdjust)) * bgHeight / (float)BgRect.h)
-    });
+    // Refresh the map texture so the home minimap preview (HomeMiniMapWindow,
+    // which positions itself relative to backgroundRect()) reflects the
+    // currently selected map.
+    drawBigMap();
 
     // Main button hover highlights
     for (const auto& btn : mHighlightButtons)

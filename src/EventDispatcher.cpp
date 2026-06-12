@@ -30,6 +30,7 @@
 
 #include "AppWindows.h"
 #include "MiniMapWindow.h"
+#include "HomeMiniMapWindow.h"
 #include "PopupState.h"
 #include "Tool.h"
 

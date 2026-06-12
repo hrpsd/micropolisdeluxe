@@ -61,7 +61,7 @@ EvaluationWindow::EvaluationWindow(SDL_Renderer* renderer):
 {
     mTitle = "City Evaluation";
     closeButtonActive(true);
-    size({ BgRect.w, BgRect.h });
+    size({ (int)roundf(BgRect.w * scale), (int)roundf(BgRect.h * scale) });
 
     SDL_SetTextureBlendMode(mTextTexture.texture, SDL_BLENDMODE_BLEND);
 }

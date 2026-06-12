@@ -11,7 +11,7 @@ namespace {
 
 MessagesWindow::MessagesWindow()
 {
-    size({ 360, 216 });
+    size({ (int)roundf(bgRect.w * scale), (int)roundf(bgRect.h * scale) });
     mTitle = "Messages";
     closeButtonActive(true);
 }

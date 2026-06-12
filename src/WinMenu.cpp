@@ -6,6 +6,7 @@
 #include "Sprite.h"
 #include "gameOptions.h"
 #include "MiniMapWindow.h"
+#include "HomeMiniMapWindow.h"
 #include "SaveAsWindow.h"
 #include "CityProperties.h"
 #include <SDL_syswm.h>

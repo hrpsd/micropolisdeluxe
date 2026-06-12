@@ -59,6 +59,9 @@ public:
     void draw() override;
     void update() override {}
 
+    // On-screen rect of the (letterboxed) background art within the home window.
+    SDL_Rect backgroundRect() const;
+
     std::string mTextFieldContent;
 
     int lastPitch{ 0 };

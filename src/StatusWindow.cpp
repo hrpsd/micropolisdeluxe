@@ -14,7 +14,7 @@ namespace {
 
 StatusWindow::StatusWindow()
 {
-    size({ 360, 130 });
+    size({ (int)roundf(bgRect.w * scale), (int)roundf(bgRect.h * scale) });
     mTitle = "City Status";
     closeButtonActive(false);
     position({ 0, 0 });

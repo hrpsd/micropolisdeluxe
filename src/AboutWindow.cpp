@@ -34,7 +34,7 @@ SDL_Rect bgRect = { 0, 0, 1100, 700 };
 
 AboutWindow::AboutWindow()
 {
-    size({ 1100, 700 });
+    size({ (int)roundf(bgRect.w * scale), (int)roundf(bgRect.h * scale) });
     SDL_Surface* aboutSurface = TTF_RenderText_Blended_Wrapped(fonts.body->mFontInfo.font, aboutText, SDL_Color{ 0, 0, 0 }, (int)roundf(bgRect.w * 0.95f));
     aboutWidth = aboutSurface->w;
     aboutHeight = aboutSurface->h;

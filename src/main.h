@@ -74,8 +74,8 @@ extern const int TileSize;
 extern int renderTileSize;
 extern int miniTileSize;
 
-extern int defaultWindowWidth;
-extern int defaultWindowHeight;
+extern const int defaultWindowWidth;
+extern const int defaultWindowHeight;
 
 // On Windows the OS adds ~20px; the window is created taller to compensate
 #if defined(_WIN64)

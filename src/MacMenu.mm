@@ -12,6 +12,7 @@
 #import "Sprite.h"
 #import "s_disast.h"
 #include "gameOptions.h"
+#include "HomeMiniMapWindow.h"
 #include "MiniMapWindow.h"
 
 NSMenuItem *autoBudgetMenuItem;

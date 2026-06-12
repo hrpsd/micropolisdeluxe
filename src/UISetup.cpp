@@ -26,6 +26,7 @@
 #include "Evaluation.h"
 #include "gameOptions.h"
 #include "g_ani.h"
+#include "HomeMiniMapWindow.h"
 #include "Map.h"
 #include "MiniMapWindow.h"
 #include "s_fileio.h"
@@ -359,7 +360,7 @@ void initUI()
         533, 47
     };
 
-    appWindows.homeMiniMap = std::make_unique<MiniMapWindow>(mainWindowRenderer, MPoint<int>{ 533, 47 }, Vector<int>{ SimWidth, SimHeight });
+    appWindows.homeMiniMap = std::make_unique<HomeMiniMapWindow>(mainWindowRenderer);
 
     appWindows.gameMiniMap = std::make_unique<MiniMapWindow>(mainWindowRenderer, MPoint<int>{ 0, 350 }, Vector<int>{ SimWidth, SimHeight });
     appWindows.gameMiniMap->updateViewportSize(Vector<int>{ FullMapViewportRect().w, FullMapViewportRect().h });
@@ -543,7 +544,7 @@ void drawThumbCityInRect(std::string path, SDL_Rect dstRect)
     cityName[0] = std::toupper(cityName[0]);
 
     int stringWidth{fonts.body->size(cityName).x};
-    fonts.renderer->drawString(*fonts.body, cityName, {dstRect.x + dstRect.w / 2 - stringWidth / 2, dstRect.y + dstRect.h});
+    fonts.renderer->drawString(*fonts.body, cityName, {dstRect.x + dstRect.w / 2 - stringWidth / 2, dstRect.y + dstRect.h - (int)roundf(5 * scale)});
 }
 
 // Popup rendering now lives in PopupWindow::draw() and is invoked via the

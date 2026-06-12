@@ -116,7 +116,7 @@ GraphWindow::GraphWindow(SDL_Renderer* renderer) :
 {
     mTitle = "Graph";
     closeButtonActive(true);
-    size({264, 287});
+    size({ (int)roundf(Bg.w * scale), (int)roundf(Bg.h * scale) });
     //initTexture(*mainWindowRenderer, mGraphTexture, { GraphLayout.w, GraphLayout.h });
 }
 

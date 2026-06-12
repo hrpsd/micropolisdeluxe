@@ -33,6 +33,7 @@
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\messages.cpp" />
     <ClCompile Include="src\MessagesWindow.cpp" />
+    <ClCompile Include="src\HomeMiniMapWindow.cpp" />
     <ClCompile Include="src\MiniMapWindow.cpp" />
     <ClCompile Include="src\QueryWindow.cpp" />
     <ClCompile Include="src\SavedGamesWindow.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="src\HomeWindow.h" />
     <ClInclude Include="src\Map.h" />
     <ClInclude Include="src\MessagesWindow.h" />
+    <ClInclude Include="src\HomeMiniMapWindow.h" />
     <ClInclude Include="src\MiniMapWindow.h" />
     <ClInclude Include="src\Point.h" />
     <ClInclude Include="src\PointInRectangleRange.h" />

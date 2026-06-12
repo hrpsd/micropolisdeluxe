@@ -30,6 +30,7 @@
 #include "EvaluationWindow.h"
 #include "GraphWindow.h"
 #include "MiniMapWindow.h"
+#include "HomeMiniMapWindow.h"
 #include "QueryWindow.h"
 #include "SavedGamesWindow.h"
 #include "MessagesWindow.h"
@@ -138,8 +139,8 @@ int renderTileSize{16};
 int miniTileSize{3};
 
 // Window creation dimensions — used by initRenderer() to avoid magic numbers
-int defaultWindowWidth;
-int defaultWindowHeight;
+const int defaultWindowWidth { 896 };
+const int defaultWindowHeight { 504 };
 
 float scale = -1.0f;
 float ToolPaletteScale{1.0f};
@@ -221,11 +222,11 @@ void initRenderer()
 
     printf("Desktop display size %d %d\n", displayMode.w, displayMode.h);
 
-    defaultWindowWidth = displayMode.w * 80 / 100 / 16 * 16;
-    defaultWindowHeight = displayMode.h * 85 / 100 / 16 * 16;
+    int SDLWindowWidth = displayMode.w * 80 / 100 / 16 * 16;
+    int SDLWindowHeight = displayMode.h * 85 / 100 / 16 * 16;
     
-    defaultWindowWidth = std::min(defaultWindowWidth, defaultWindowHeight * 16 / 9);
-    defaultWindowHeight = defaultWindowWidth * 9 / 16;
+    SDLWindowWidth = std::min(SDLWindowWidth, SDLWindowHeight * 16 / 9);
+    SDLWindowHeight = SDLWindowWidth * 9 / 16;
 
     printf("Window size %d %d\n", defaultWindowWidth, defaultWindowHeight);
 
@@ -233,8 +234,8 @@ void initRenderer()
         "Micropolis Deluxe",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        defaultWindowWidth,
-        defaultWindowHeight + PlatformHeightAdjust,
+        SDLWindowWidth,
+        SDLWindowHeight + PlatformHeightAdjust,
         SDL_WINDOW_RESIZABLE);
 
     if (!MainWindow)
@@ -245,6 +246,9 @@ void initRenderer()
     mainWindowOwner.reset(MainWindow);
 
     SDL_SetWindowMinimumSize(MainWindow, defaultWindowWidth, defaultWindowHeight);
+
+    viewState.windowSize.x = SDLWindowWidth;
+    viewState.windowSize.y = SDLWindowHeight;
 
 #if defined(__APPLE__)
     mainWindowRenderer = SDL_CreateRenderer(MainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);

@@ -20,6 +20,7 @@
 
 #include "g_ani.h"
 #include "MiniMapWindow.h"
+#include "HomeMiniMapWindow.h"
 #include "s_alloc.h"
 #include "s_disast.h"
 #include "s_fileio.h"

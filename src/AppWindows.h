@@ -26,6 +26,7 @@
 
 // MiniMapWindow.h includes main.h — forward-declare to avoid circular include
 class MiniMapWindow;
+class HomeMiniMapWindow;
 class GraphWindow;
 class AboutWindow;
 class BudgetWindow;
@@ -44,7 +45,7 @@ struct AppWindows
     std::unique_ptr<BudgetWindow>     budget;
     std::unique_ptr<GraphWindow>      graph;
     std::unique_ptr<EvaluationWindow> evaluation;
-    std::unique_ptr<MiniMapWindow>    homeMiniMap;
+    std::unique_ptr<HomeMiniMapWindow> homeMiniMap;
     std::unique_ptr<MiniMapWindow>    gameMiniMap;
     std::unique_ptr<ToolPalette>      toolPalette;
     std::unique_ptr<QueryWindow>      query;

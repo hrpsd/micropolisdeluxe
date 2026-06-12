@@ -17,8 +17,7 @@
 
 namespace
 {
-    constexpr SDL_Rect BgRect{ 0, 0, 900, 600 };
-    constexpr SDL_Rect CloseButtonRect{ 61, 221, 142, 20 };
+    constexpr SDL_Rect BgRect{ 0, 0, 768, 432 };
 };
 
 const int cols = 6;
@@ -29,7 +28,7 @@ SavedGamesWindow::SavedGamesWindow(SDL_Renderer* renderer) :
     mDownButton(loadTexture(mainWindowRenderer, "images/down.png")),
     mUpButton(loadTexture(mainWindowRenderer, "images/up.png"))
 {
-    size({ BgRect.w, BgRect.h });
+    size({ (int)roundf(BgRect.w * scale), (int)roundf(BgRect.h * scale) });
 
     mTitle = "Load City";
     closeButtonActive(true);
@@ -62,13 +61,14 @@ void SavedGamesWindow::draw()
  
     int i = 0;
     
-    int width  = (int)roundf(120 * scale);
-    int height = (int)roundf(100 * scale);
+    int width  = (int)roundf(96 * scale);
+    int height = (int)roundf(80 * scale);
+
+    int hSpacing = (int)roundf(25 * scale);
+    int vSpacing = (int)roundf(16 * scale);
     
-    int spacing = (int)roundf(24 * scale);
-    
-    int xOffset = (int)roundf((area().width - cols * (width + spacing) + spacing) / 2.0f);
-    int yOffset = mTitleBarArea.height + (int)roundf((area().height - mTitleBarArea.height - 4 * (height + spacing) + spacing) / 2.0f);
+    int xOffset = (int)roundf((area().width - cols * (width + hSpacing) + hSpacing) / 2.0f);
+    int yOffset = mTitleBarArea.height + (int)roundf((area().height - mTitleBarArea.height - 4 * (height + vSpacing) + vSpacing) / 2.0f);
     
     numCities = (int)result_set.size();
     
@@ -81,7 +81,7 @@ void SavedGamesWindow::draw()
         {
             int j = i - rowOffset * cols;
             
-            SDL_Rect buttonRect = { area().x + xOffset + (j % cols) * (width + spacing), area().y + yOffset + (j / cols) * (height + spacing), width, height};
+            SDL_Rect buttonRect = { area().x + xOffset + (j % cols) * (width + hSpacing), area().y + yOffset + (j / cols) * (height + vSpacing), width, height};
             
             mButtons.push_back(buttonRect);
             mPaths.push_back(path.string());
@@ -105,19 +105,6 @@ void SavedGamesWindow::draw()
 
 void SavedGamesWindow::onMouseDown(const MPoint<int>& position)
 {
-    const MRectangle<int> closeButtonRect =
-    {
-        area().x + CloseButtonRect.x,
-        area().y + CloseButtonRect.y,
-        CloseButtonRect.w,
-        CloseButtonRect.h
-    };
-    
-    if (closeButtonRect.contains(position))
-    {
-        hide();
-    }
-    
     const SDL_Point& pt{ position.x, position.y };
     
     if (SDL_PointInRect(&pt, &mUpRect))

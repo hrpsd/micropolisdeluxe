@@ -2,6 +2,7 @@
 #include "main.h"
 #include "FontSet.h"
 #include "MiniMapWindow.h"
+#include "HomeMiniMapWindow.h"
 
 namespace
 {

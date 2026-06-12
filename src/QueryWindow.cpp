@@ -30,7 +30,7 @@ QueryWindow::QueryWindow(SDL_Renderer* renderer) :
     mRenderer{ renderer },
     mStringRenderer{ renderer }
 {
-    size({ BgRect.w, BgRect.h });
+    size({ (int)roundf(BgRect.w * scale), (int)roundf(BgRect.h * scale) });
 
     closeButtonActive(false);
 }
